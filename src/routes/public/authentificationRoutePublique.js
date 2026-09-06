@@ -1,5 +1,5 @@
 const express = require("express");
-const controleur = require("../../controllers/authentification");
+const controleur = require("../../controllers/authentificationController");
 
 const routeur = express.Router();
 routeur.post("/inscription", controleur.inscrire);

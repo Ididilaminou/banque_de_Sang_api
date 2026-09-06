@@ -22,14 +22,22 @@ Puis ouvre : http://localhost:3000/health
 
 ```text
 src/
-├── config/          # Configuration et connexion Prisma
-├── models/          # Accès aux données Prisma
-├── controllers/     # Logique métier des opérations
-├── middlewares/     # Authentification et autorisation
+├── config/          # envConfig.js, prismaConfig.js
+├── models/          # utilisateurModel.js, donneurModel.js
+├── controllers/     # *Controller.js
+├── middlewares/     # *Middleware.js
 └── routes/
-    ├── public/      # Routes accessibles sans connexion
-    └── privees/     # Routes nécessitant un jeton JWT
+    ├── public/      # *RoutePublique.js
+    └── privees/     # *RoutePrivee.js
 ```
+
+Les fichiers portent un suffixe indiquant leur responsabilité :
+
+- `Model` : accès aux données ;
+- `Controller` : logique métier ;
+- `Middleware` : traitement intermédiaire et sécurité ;
+- `RoutePublique` / `RoutePrivee` : définition des routes ;
+- `Config` : configuration technique.
 
 Les URLs existantes restent inchangées. Par exemple :
 

@@ -1,5 +1,5 @@
-const app = require("./app");
-const env = require("./config/env");
+const app = require("./application");
+const env = require("./config/envConfig");
 
 app.listen(env.port, () => {
   console.log(`Serveur démarré sur http://localhost:${env.port}`);

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-const prisma = require("../config/prisma");
-const env = require("../config/env");
+const prisma = require("../config/prismaConfig");
+const env = require("../config/envConfig");
 
 async function authentifierUtilisateur(req, res, next) {
   const enTeteAutorisation = req.get("Authorization");

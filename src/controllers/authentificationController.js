@@ -1,8 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const utilisateur = require("../models/utilisateur");
-const env = require("../config/env");
+const utilisateur = require("../models/utilisateurModel");
+const env = require("../config/envConfig");
 
 function reponseUtilisateur(utilisateurConnecte) {
   return {

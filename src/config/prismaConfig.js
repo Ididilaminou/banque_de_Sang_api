@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { PrismaMariaDb } = require("@prisma/adapter-mariadb");
-const env = require("./env");
+const env = require("./envConfig");
 
 if (!env.databaseUrl) {
   throw new Error("DATABASE_URL est obligatoire pour connecter Prisma.");

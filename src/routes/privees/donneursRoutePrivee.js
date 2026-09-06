@@ -1,7 +1,7 @@
 const express = require("express");
-const controleur = require("../../controllers/donneurs");
-const authentifierUtilisateur = require("../../middlewares/authentification");
-const autoriserRoles = require("../../middlewares/autorisation");
+const controleur = require("../../controllers/donneursController");
+const authentifierUtilisateur = require("../../middlewares/authentificationMiddleware");
+const autoriserRoles = require("../../middlewares/autorisationMiddleware");
 
 const routeur = express.Router();
 const protegerDonneur = [authentifierUtilisateur, autoriserRoles("DONNEUR")];

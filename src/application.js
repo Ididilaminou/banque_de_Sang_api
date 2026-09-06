@@ -1,9 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-const routeurAuthentificationPublique = require("./routes/public/authentification");
-const routeurAuthentificationPrivee = require("./routes/privees/authentification");
-const routeurUtilisateursPrivees = require("./routes/privees/utilisateurs");
-const routeurDonneursPrivees = require("./routes/privees/donneurs");
+const routeurAuthentificationPublique = require("./routes/public/authentificationRoutePublique");
+const routeurAuthentificationPrivee = require("./routes/privees/authentificationRoutePrivee");
+const routeurUtilisateursPrivees = require("./routes/privees/utilisateursRoutePrivee");
+const routeurDonneursPrivees = require("./routes/privees/donneursRoutePrivee");
 
 // Création de l'application Express
 const app = express();

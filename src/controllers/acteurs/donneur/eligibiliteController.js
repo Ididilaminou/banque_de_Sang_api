@@ -112,10 +112,22 @@ async function tester(req, res, next) {
       dernierDonDate,
     };
     const decisionRegles = calculerResultat(questionnaire);
-    const analyse = await eligibiliteIa.analyserQuestionnaire({
-      ...questionnaire,
-      avertissement: "Analyse préliminaire uniquement; validation médicale obligatoire.",
-    });
+    let analyse;
+    let analyseAutomatiqueDisponible = true;
+    try {
+      analyse = await eligibiliteIa.analyserQuestionnaire({
+        ...questionnaire,
+        avertissement: "Analyse préliminaire uniquement; validation médicale obligatoire.",
+      });
+    } catch (erreurIa) {
+      // Le questionnaire reste utilisable si le service IA est indisponible.
+      analyseAutomatiqueDisponible = false;
+      analyse = {
+        resultat: decisionRegles.resultat,
+        analyse: "Analyse automatique indisponible. Le résultat repose temporairement sur les règles préliminaires du questionnaire.",
+        recommandations: "Une validation par un professionnel de santé est obligatoire avant tout don.",
+      };
+    }
     const test = await eligibilite.creer({
       ...questionnaire,
       resultat: analyse.resultat,
@@ -126,7 +138,10 @@ async function tester(req, res, next) {
 
     return res.status(201).json({
       ok: true,
-      message: "Analyse IA enregistrée. La décision finale appartient à un professionnel de santé.",
+      message: analyseAutomatiqueDisponible
+        ? "Analyse IA enregistrée. La décision finale appartient à un professionnel de santé."
+        : "Questionnaire enregistré. L'analyse IA est indisponible pour le moment; une validation professionnelle est requise.",
+      analyseAutomatiqueDisponible,
       test,
     });
   } catch (erreur) {

@@ -52,6 +52,7 @@ model Utilisateur {
   dateModification  DateTime @updatedAt
 
   donneur           Donneur?
+  activationCompte  ActivationCompte?
 
   @@map("utilisateurs")
 }
@@ -84,4 +85,18 @@ model Etablissement {
   dateModification  DateTime             @updatedAt
 
   @@map("etablissements")
+}
+
+model ActivationCompte {
+  identifiant             Int         @id @default(autoincrement())
+  utilisateurIdentifiant  Int         @unique
+  codeHash                String      @db.VarChar(64)
+  dateExpiration          DateTime
+  estUtilise              Boolean     @default(false)
+  dateUtilisation         DateTime?
+  dateCreation            DateTime    @default(now())
+
+  utilisateur             Utilisateur @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@map("activations_comptes")
 }

@@ -1,7 +1,9 @@
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
 const utilisateur = require("../models/utilisateurModel");
+const activationCompte = require("../models/activationCompteModel");
 const env = require("../config/envConfig");
 
 function reponseUtilisateur(utilisateurConnecte) {
@@ -56,12 +58,14 @@ async function inscrire(req, res, next) {
       return res.status(409).json({ ok: false, message: "Un utilisateur existe déjà avec ce courriel." });
     }
 
+    // Un donneur doit être vérifié par la banque avant de pouvoir se connecter.
     const cree = await utilisateur.creer({
       courriel: courrielNormalise,
       motDePasseHash: await bcrypt.hash(motDePasse, 12),
       prenom: prenomNormalise,
       nom: nomNormalise,
       telephone: typeof telephone === "string" ? telephone.trim() || null : null,
+      estActif: false,
     });
 
     return res.status(201).json({ ok: true, message: "Inscription réussie.", utilisateur: cree });
@@ -69,6 +73,56 @@ async function inscrire(req, res, next) {
     if (erreur.code === "P2002") {
       return res.status(409).json({ ok: false, message: "Un utilisateur existe déjà avec ce courriel." });
     }
+
+    return next(erreur);
+  }
+}
+
+async function activerCompte(req, res, next) {
+  const { courriel, codeActivation } = req.body;
+
+  if (
+    typeof courriel !== "string" ||
+    typeof codeActivation !== "string" ||
+    !/^AID-[A-Z0-9]{6}$/.test(codeActivation.trim())
+  ) {
+    return res.status(400).json({
+      ok: false,
+      message: "Le courriel est obligatoire et le code doit respecter le format AID-XXXXXX.",
+    });
+  }
+
+  try {
+    const trouve = await utilisateur.trouverParCourriel(courriel.trim().toLowerCase());
+    const activation = trouve
+      ? await activationCompte.trouverParUtilisateur(trouve.identifiant)
+      : null;
+
+    // On compare le code reçu avec son hash stocké, jamais avec un code en clair.
+    const codeValide =
+      activation &&
+      !activation.estUtilise &&
+      activation.dateExpiration > new Date() &&
+      crypto
+        .createHash("sha256")
+        .update(codeActivation.trim())
+        .digest("hex") === activation.codeHash;
+
+    if (!trouve || !activation || !codeValide) {
+      return res.status(400).json({
+        ok: false,
+        message: "Le code d'activation est invalide ou expiré.",
+      });
+    }
+
+    await utilisateur.modifier(trouve.identifiant, { estActif: true });
+    await activationCompte.marquerCommeUtilise(activation.identifiant);
+
+    return res.json({
+      ok: true,
+      message: "Compte activé avec succès. Vous pouvez maintenant vous connecter.",
+    });
+  } catch (erreur) {
     return next(erreur);
   }
 }
@@ -120,4 +174,4 @@ async function modifierMotDePasse(req, res, next) {
   }
 }
 
-module.exports = { inscrire, connecter, modifierMotDePasse };
+module.exports = { inscrire, connecter, modifierMotDePasse, activerCompte };

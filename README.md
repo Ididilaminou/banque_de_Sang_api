@@ -47,6 +47,35 @@ Les URLs existantes restent inchangées. Par exemple :
 - `GET /donneurs/recherche` est une route privée avec contrôle de rôle.
 - `POST /etablissements` permet à un administrateur de créer un établissement ;
 - `PATCH /etablissements/:identifiant/statut` permet de le valider ou le suspendre.
+- `POST /donneurs/:identifiant/verifier` permet à la banque de vérifier un donneur et de générer son code ;
+- `POST /authentification/activation` permet au donneur d'activer son compte avec ce code.
+
+### Activation d'un donneur
+
+Lors de l'inscription, le compte du donneur est créé avec `estActif: false`.
+Un membre du personnel de banque vérifie ensuite le compte :
+
+```http
+POST /donneurs/:identifiant/verifier
+Authorization: Bearer JETON_DU_PERSONNEL
+```
+
+Le système génère un code au format `AID-XXXXXX`, valable 24 heures. Pour le test local,
+le code est retourné dans la réponse. Il sera envoyé par email lorsque le service
+Gmail SMTP sera branché.
+
+Le donneur active ensuite son compte :
+
+```http
+POST /authentification/activation
+```
+
+```json
+{
+  "courriel": "donneur@example.com",
+  "codeActivation": "AID-7K4P9X"
+}
+```
 
 ## Scripts
 

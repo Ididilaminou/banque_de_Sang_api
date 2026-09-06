@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-const routeurAuthentification = require("./routes/authentification");
-const routeurUtilisateurs = require("./routes/utilisateurs");
-const routeurDonneurs = require("./routes/donneurs");
+const routeurAuthentificationPublique = require("./routes/public/authentification");
+const routeurAuthentificationPrivee = require("./routes/privees/authentification");
+const routeurUtilisateursPrivees = require("./routes/privees/utilisateurs");
+const routeurDonneursPrivees = require("./routes/privees/donneurs");
 
 // Création de l'application Express
 const app = express();
@@ -44,11 +45,12 @@ app.get("/", acceuil);
 app.get("/health", healthCheck);
 
 // Préfixe des routes d'authentification
-app.use("/authentification", routeurAuthentification);
+app.use("/authentification", routeurAuthentificationPublique);
+app.use("/authentification", routeurAuthentificationPrivee);
 
 // Préfixe des routes utilisateurs
-app.use("/utilisateurs", routeurUtilisateurs);
-app.use("/donneurs", routeurDonneurs);
+app.use("/utilisateurs", routeurUtilisateursPrivees);
+app.use("/donneurs", routeurDonneursPrivees);
 
 // À placer en dernier pour intercepter les routes manquantes
 app.use(routeIntrouvable);

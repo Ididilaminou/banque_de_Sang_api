@@ -18,6 +18,26 @@ npm run dev
 
 Puis ouvre : http://localhost:3000/health
 
+## Organisation du code
+
+```text
+src/
+├── config/          # Configuration et connexion Prisma
+├── models/          # Accès aux données Prisma
+├── controllers/     # Logique métier des opérations
+├── middlewares/     # Authentification et autorisation
+└── routes/
+    ├── public/      # Routes accessibles sans connexion
+    └── privees/     # Routes nécessitant un jeton JWT
+```
+
+Les URLs existantes restent inchangées. Par exemple :
+
+- `POST /authentification/inscription` est une route publique ;
+- `POST /authentification/connexion` est une route publique ;
+- `GET /utilisateurs/moi` est une route privée ;
+- `GET /donneurs/recherche` est une route privée avec contrôle de rôle.
+
 ## Scripts
 
 | Commande | Rôle |

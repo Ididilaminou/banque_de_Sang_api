@@ -1,0 +1,123 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const utilisateur = require("../models/utilisateur");
+const env = require("../config/env");
+
+function reponseUtilisateur(utilisateurConnecte) {
+  return {
+    identifiant: utilisateurConnecte.identifiant,
+    courriel: utilisateurConnecte.courriel,
+    prenom: utilisateurConnecte.prenom,
+    nom: utilisateurConnecte.nom,
+    telephone: utilisateurConnecte.telephone,
+    role: utilisateurConnecte.role,
+    estActif: utilisateurConnecte.estActif,
+  };
+}
+
+async function inscrire(req, res, next) {
+  const { courriel, motDePasse, prenom, nom, telephone } = req.body;
+
+  if (
+    typeof courriel !== "string" ||
+    typeof motDePasse !== "string" ||
+    typeof prenom !== "string" ||
+    typeof nom !== "string"
+  ) {
+    return res.status(400).json({
+      ok: false,
+      message: "Les champs courriel, motDePasse, prenom et nom sont obligatoires.",
+    });
+  }
+
+  const courrielNormalise = courriel.trim().toLowerCase();
+  const prenomNormalise = prenom.trim();
+  const nomNormalise = nom.trim();
+
+  if (
+    !courrielNormalise ||
+    !prenomNormalise ||
+    !nomNormalise ||
+    motDePasse.length < 8
+  ) {
+    return res.status(400).json({
+      ok: false,
+      message: "Le courriel, le prénom et le nom ne doivent pas être vides. Le mot de passe doit contenir au moins 8 caractères.",
+    });
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(courrielNormalise)) {
+    return res.status(400).json({ ok: false, message: "Le format du courriel est invalide." });
+  }
+
+  try {
+    if (await utilisateur.trouverParCourriel(courrielNormalise)) {
+      return res.status(409).json({ ok: false, message: "Un utilisateur existe déjà avec ce courriel." });
+    }
+
+    const cree = await utilisateur.creer({
+      courriel: courrielNormalise,
+      motDePasseHash: await bcrypt.hash(motDePasse, 12),
+      prenom: prenomNormalise,
+      nom: nomNormalise,
+      telephone: typeof telephone === "string" ? telephone.trim() || null : null,
+    });
+
+    return res.status(201).json({ ok: true, message: "Inscription réussie.", utilisateur: cree });
+  } catch (erreur) {
+    if (erreur.code === "P2002") {
+      return res.status(409).json({ ok: false, message: "Un utilisateur existe déjà avec ce courriel." });
+    }
+    return next(erreur);
+  }
+}
+
+async function connecter(req, res, next) {
+  const { courriel, motDePasse } = req.body;
+  if (typeof courriel !== "string" || typeof motDePasse !== "string") {
+    return res.status(400).json({ ok: false, message: "Les champs courriel et motDePasse sont obligatoires." });
+  }
+
+  try {
+    const trouve = await utilisateur.trouverParCourriel(courriel.trim().toLowerCase());
+    if (!trouve || !trouve.estActif || !(await bcrypt.compare(motDePasse, trouve.motDePasseHash))) {
+      return res.status(401).json({ ok: false, message: "Courriel ou mot de passe incorrect." });
+    }
+    if (!env.jwtSecret) return next(new Error("JWT_SECRET est obligatoire pour générer un jeton."));
+
+    const jeton = jwt.sign(
+      { identifiant: trouve.identifiant, role: trouve.role },
+      env.jwtSecret,
+      { expiresIn: env.jwtExpiresIn },
+    );
+    return res.json({ ok: true, message: "Connexion réussie.", jeton, utilisateur: reponseUtilisateur(trouve) });
+  } catch (erreur) {
+    return next(erreur);
+  }
+}
+
+async function modifierMotDePasse(req, res, next) {
+  const { ancienMotDePasse, nouveauMotDePasse } = req.body;
+  if (typeof ancienMotDePasse !== "string" || typeof nouveauMotDePasse !== "string") {
+    return res.status(400).json({ ok: false, message: "Les champs ancienMotDePasse et nouveauMotDePasse sont obligatoires." });
+  }
+  if (nouveauMotDePasse.length < 8) {
+    return res.status(400).json({ ok: false, message: "Le nouveau mot de passe doit contenir au moins 8 caractères." });
+  }
+
+  try {
+    const trouve = await utilisateur.trouverParIdentifiant(req.utilisateur.identifiant, { motDePasseHash: true });
+    if (!trouve || !(await bcrypt.compare(ancienMotDePasse, trouve.motDePasseHash))) {
+      return res.status(401).json({ ok: false, message: "L'ancien mot de passe est incorrect." });
+    }
+    await utilisateur.modifier(req.utilisateur.identifiant, {
+      motDePasseHash: await bcrypt.hash(nouveauMotDePasse, 12),
+    });
+    return res.json({ ok: true, message: "Mot de passe modifié avec succès." });
+  } catch (erreur) {
+    return next(erreur);
+  }
+}
+
+module.exports = { inscrire, connecter, modifierMotDePasse };

@@ -1,0 +1,12 @@
+// Schéma Prisma : la "carte" de ta base MySQL.
+// Étape 0 : on déclare seulement le moteur (MySQL).
+// Étape 1 : on ajoutera les modèles (User, Donneur, Don, etc.).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}

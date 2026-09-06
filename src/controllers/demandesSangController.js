@@ -1,4 +1,5 @@
 const demandeSang = require("../models/demandeSangModel");
+const notification = require("../models/notificationModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -55,6 +56,14 @@ async function creer(req, res, next) {
       quantite,
       urgence,
       motif: motif.trim(),
+    });
+
+    await notification.notifierRoles({
+      roles: ["PERSONNEL_BANQUE", "ADMINISTRATEUR"],
+      demandeSangIdentifiant: resultat.identifiant,
+      type: "DEMANDE_SANG_CREEE",
+      titre: urgence ? "Nouvelle demande urgente" : "Nouvelle demande de sang",
+      message: `Une demande de ${quantite} unité(s) de ${produit} a été créée.`,
     });
 
     return res.status(201).json({
@@ -134,6 +143,14 @@ async function modifier(req, res, next) {
         etablissementDestinataireId === undefined
           ? undefined
           : Number(etablissementDestinataireId),
+    });
+
+    await notification.notifierRoles({
+      roles: ["PERSONNEL_HOPITAL", "ADMINISTRATEUR"],
+      demandeSangIdentifiant: resultat.identifiant,
+      type: "DEMANDE_SANG_MISE_A_JOUR",
+      titre: "Mise à jour d'une demande de sang",
+      message: `La demande n°${resultat.identifiant} est maintenant ${statut}.`,
     });
 
     return res.json({

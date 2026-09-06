@@ -54,6 +54,7 @@ model Utilisateur {
 
   donneur           Donneur?
   activationCompte  ActivationCompte?
+  notifications     Notification[]
 
   @@map("utilisateurs")
 }
@@ -139,9 +140,28 @@ model DemandeSang {
 
   etablissementDemandeur        Etablissement      @relation("EtablissementDemandeur", fields: [etablissementDemandeurId], references: [identifiant])
   etablissementDestinataire     Etablissement?     @relation("EtablissementDestinataire", fields: [etablissementDestinataireId], references: [identifiant])
+  notifications                  Notification[]
 
   @@index([statut, urgence])
   @@map("demandes_sang")
+}
+
+model Notification {
+  identifiant             Int          @id @default(autoincrement())
+  utilisateurIdentifiant  Int
+  demandeSangIdentifiant  Int?
+  type                    String       @db.VarChar(60)
+  titre                   String       @db.VarChar(150)
+  message                 String       @db.VarChar(500)
+  estLue                  Boolean      @default(false)
+  dateCreation            DateTime     @default(now())
+  dateLecture             DateTime?
+
+  utilisateur             Utilisateur  @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
+  demandeSang             DemandeSang? @relation(fields: [demandeSangIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@index([utilisateurIdentifiant, estLue, dateCreation])
+  @@map("notifications")
 }
 
 enum TypeProduitSanguin {

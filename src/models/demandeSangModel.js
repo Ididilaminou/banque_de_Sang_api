@@ -35,6 +35,36 @@ module.exports = {
         quantite: true,
         statut: true,
       },
+
+      trouverRecommandationPourDonneur(demandeSangIdentifiant, donneurIdentifiant) {
+        return prisma.recommandationDonneur.findUnique({
+          where: {
+            demandeSangIdentifiant_donneurIdentifiant: {
+              demandeSangIdentifiant,
+              donneurIdentifiant,
+            },
+          },
+          select: { identifiant: true, statut: true },
+        });
+      },
+
+      enregistrerRecommandations(demandeSangIdentifiant, donneurs) {
+        return prisma.recommandationDonneur.createMany({
+          data: donneurs.map((donneur) => ({
+            demandeSangIdentifiant,
+            donneurIdentifiant: donneur.identifiant,
+          })),
+          skipDuplicates: true,
+        });
+      },
+
+      repondreRecommandation(identifiant, statut) {
+        return prisma.recommandationDonneur.update({
+          where: { identifiant },
+          data: { statut, dateReponse: new Date() },
+          select: { identifiant: true, demandeSangIdentifiant: true, statut: true },
+        });
+      },
     });
   },
 

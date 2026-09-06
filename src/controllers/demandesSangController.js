@@ -230,6 +230,7 @@ async function recommanderDonneurs(req, res, next) {
       demande.rhesus,
     );
 
+    await demandeSang.enregistrerRecommandations(demande.identifiant, donneurs);
     await notification.notifierDonneurs({
       donneurs,
       demandeSangIdentifiant: demande.identifiant,
@@ -249,4 +250,66 @@ async function recommanderDonneurs(req, res, next) {
   }
 }
 
-module.exports = { creer, lister, modifier, recommanderDonneurs };
+// Permet au donneur d'accepter ou de refuser une recommandation reçue.
+async function repondreRecommandation(req, res, next) {
+  const identifiant = Number(req.params.identifiant);
+  const { accepter } = req.body;
+
+  if (!Number.isInteger(identifiant) || typeof accepter !== "boolean") {
+    return res.status(400).json({
+      ok: false,
+      message: "L'identifiant ou la réponse du donneur est invalide.",
+    });
+  }
+
+  try {
+    const profil = await donneur.trouverParUtilisateurAvecIdentifiant(
+      req.utilisateur.identifiant,
+    );
+    const recommandation = profil
+      ? await demandeSang.trouverRecommandationPourDonneur(identifiant, profil.identifiant)
+      : null;
+
+    if (!recommandation) {
+      return res.status(404).json({
+        ok: false,
+        message: "Cette recommandation n'existe pas pour votre compte.",
+      });
+    }
+
+    if (recommandation.statut !== "EN_ATTENTE") {
+      return res.status(409).json({
+        ok: false,
+        message: "Vous avez déjà répondu à cette recommandation.",
+      });
+    }
+
+    const statut = accepter ? "ACCEPTEE" : "REFUSEE";
+    const resultat = await demandeSang.repondreRecommandation(
+      recommandation.identifiant,
+      statut,
+    );
+    await notification.notifierBanquesReponse({
+      demandeSangIdentifiant: resultat.demandeSangIdentifiant,
+      statut,
+    });
+
+    return res.json({
+      ok: true,
+      message: accepter
+        ? "Votre acceptation a été transmise à la banque."
+        : "Votre refus a été transmis à la banque.",
+      recommandation: resultat,
+    });
+  } catch (erreur) {
+    return next(erreur);
+  }
+}
+
+module.exports = {
+  creer,
+  lister,
+  modifier,
+  recommanderDonneurs,
+  repondreRecommandation,
+};

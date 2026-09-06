@@ -69,6 +69,7 @@ model Donneur {
   dateCreation             DateTime      @default(now())
   dateModification         DateTime      @updatedAt
   dons                     Don[]
+  recommandations          RecommandationDonneur[]
 
   utilisateur              Utilisateur   @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
 
@@ -141,9 +142,32 @@ model DemandeSang {
   etablissementDemandeur        Etablissement      @relation("EtablissementDemandeur", fields: [etablissementDemandeurId], references: [identifiant])
   etablissementDestinataire     Etablissement?     @relation("EtablissementDestinataire", fields: [etablissementDestinataireId], references: [identifiant])
   notifications                  Notification[]
+  recommandations               RecommandationDonneur[]
 
   @@index([statut, urgence])
   @@map("demandes_sang")
+}
+
+enum StatutRecommandation {
+  EN_ATTENTE
+  ACCEPTEE
+  REFUSEE
+}
+
+model RecommandationDonneur {
+  identifiant            Int                   @id @default(autoincrement())
+  demandeSangIdentifiant Int
+  donneurIdentifiant     Int
+  statut                 StatutRecommandation @default(EN_ATTENTE)
+  dateCreation           DateTime              @default(now())
+  dateReponse            DateTime?
+
+  demandeSang            DemandeSang           @relation(fields: [demandeSangIdentifiant], references: [identifiant], onDelete: Cascade)
+  donneur                Donneur               @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@unique([demandeSangIdentifiant, donneurIdentifiant])
+  @@index([donneurIdentifiant, statut])
+  @@map("recommandations_donneurs")
 }
 
 model Notification {

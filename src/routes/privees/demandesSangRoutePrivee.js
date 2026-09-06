@@ -25,6 +25,12 @@ const gestionnaire = [
   autoriserRoles("PERSONNEL_BANQUE", "ADMINISTRATEUR"),
 ];
 
+const protegerDonneur = [
+  authentifierUtilisateur,
+  exigerMotDePasseDefinitif,
+  autoriserRoles("DONNEUR"),
+];
+
 // Un hôpital lance une demande de sang.
 routeur.post("/", ...hopital, controleur.creer);
 
@@ -36,5 +42,12 @@ routeur.patch("/:identifiant", ...gestionnaire, controleur.modifier);
 
 // La banque recommande des donneurs si son stock est insuffisant.
 routeur.post("/:identifiant/recommander-donneurs", ...gestionnaire, controleur.recommanderDonneurs);
+
+// Le donneur accepte ou refuse la recommandation qui lui est destinée.
+routeur.post(
+  "/:identifiant/reponse-donneur",
+  ...protegerDonneur,
+  controleur.repondreRecommandation,
+);
 
 module.exports = routeur;

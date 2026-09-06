@@ -84,4 +84,11 @@ module.exports = {
       orderBy: { dateDerniereDisponibilite: "desc" },
     });
   },
+
+  trouverParUtilisateurAvecIdentifiant(utilisateurIdentifiant) {
+    return prisma.donneur.findUnique({
+      where: { utilisateurIdentifiant },
+      select: { identifiant: true },
+    });
+  },
 };

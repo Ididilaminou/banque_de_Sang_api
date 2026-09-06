@@ -27,8 +27,12 @@ src/
 ├── controllers/     # *Controller.js
 ├── middlewares/     # *Middleware.js
 └── routes/
-    ├── public/      # *RoutePublique.js
-    └── privees/     # *RoutePrivee.js
+    └── acteurs/
+        ├── donneur/          # Parcours et routes du donneur
+        ├── banque/           # Parcours et routes de la banque
+        ├── hopital/          # Parcours et routes de l'hôpital
+        ├── administrateur/   # Administration de la plateforme
+        └── commun/           # Authentification, utilisateurs, notifications
 ```
 
 Les fichiers portent un suffixe indiquant leur responsabilité :
@@ -38,6 +42,10 @@ Les fichiers portent un suffixe indiquant leur responsabilité :
 - `Middleware` : traitement intermédiaire et sécurité ;
 - `RoutePublique` / `RoutePrivee` : définition des routes ;
 - `Config` : configuration technique.
+
+Les routes sont rangées par acteur pour faciliter la navigation. Cette organisation
+ne change pas les URLs publiques de l'API : elle change uniquement l'emplacement
+des fichiers dans le projet.
 
 Les URLs existantes restent inchangées. Par exemple :
 

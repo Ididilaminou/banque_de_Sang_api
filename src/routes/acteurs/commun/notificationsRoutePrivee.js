@@ -1,8 +1,8 @@
 const express = require("express");
 
-const controleur = require("../../controllers/notificationsController");
-const authentifierUtilisateur = require("../../middlewares/authentificationMiddleware");
-const exigerMotDePasseDefinitif = require("../../middlewares/motDePasseDefinitifMiddleware");
+const controleur = require("../../../controllers/notificationsController");
+const authentifierUtilisateur = require("../../../middlewares/authentificationMiddleware");
+const exigerMotDePasseDefinitif = require("../../../middlewares/motDePasseDefinitifMiddleware");
 
 const routeur = express.Router();
 const utilisateurConnecte = [authentifierUtilisateur, exigerMotDePasseDefinitif];

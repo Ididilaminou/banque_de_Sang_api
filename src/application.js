@@ -11,6 +11,7 @@ const routeurDonsPrivee = require("./routes/privees/donsRoutePrivee");
 const routeurStocksPrivee = require("./routes/privees/stocksRoutePrivee");
 const routeurDemandesSangPrivee = require("./routes/privees/demandesSangRoutePrivee");
 const routeurNotificationsPrivee = require("./routes/privees/notificationsRoutePrivee");
+const routeurEligibilitePrivee = require("./routes/privees/eligibiliteRoutePrivee");
 const routeurInstallationPublique = require("./routes/public/installationRoutePublique");
 
 // Création de l'application Express
@@ -66,6 +67,7 @@ app.use("/dons", routeurDonsPrivee);
 app.use("/stocks", routeurStocksPrivee);
 app.use("/demandes-sang", routeurDemandesSangPrivee);
 app.use("/notifications", routeurNotificationsPrivee);
+app.use("/eligibilite", routeurEligibilitePrivee);
 app.use("/installation/administrateur", routeurInstallationPublique);
 
 // À placer en dernier pour intercepter les routes manquantes

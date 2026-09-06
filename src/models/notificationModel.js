@@ -63,6 +63,17 @@ module.exports = {
     });
   },
 
+  // Informe les banques qu'un donneur a répondu à une recommandation.
+  notifierBanquesReponse({ demandeSangIdentifiant, statut }) {
+    return this.notifierRoles({
+      roles: ["PERSONNEL_BANQUE", "ADMINISTRATEUR"],
+      demandeSangIdentifiant,
+      type: "REPONSE_RECOMMANDATION",
+      titre: "Réponse d'un donneur",
+      message: `Un donneur a ${statut === "ACCEPTEE" ? "accepté" : "refusé"} la recommandation.`,
+    });
+  },
+
   // Marque une notification appartenant à l'utilisateur comme lue.
   marquerCommeLue(identifiant, utilisateurIdentifiant) {
     return prisma.notification.updateMany({

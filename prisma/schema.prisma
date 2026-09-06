@@ -70,10 +70,39 @@ model Donneur {
   dateModification         DateTime      @updatedAt
   dons                     Don[]
   recommandations          RecommandationDonneur[]
+  testsEligibilite         TestEligibilite[]
 
   utilisateur              Utilisateur   @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
 
   @@map("donneurs")
+}
+
+enum ResultatEligibilite {
+  ELIGIBLE
+  NON_ELIGIBLE
+  A_VALIDER
+}
+
+model TestEligibilite {
+  identifiant             Int                 @id @default(autoincrement())
+  donneurIdentifiant      Int
+  age                     Int
+  poidsKg                 Float
+  fievreRecente           Boolean
+  maladieEnCours          Boolean
+  prendAntibiotiques      Boolean
+  grossesseOuAllaitement  Boolean
+  tatouageRecent          Boolean
+  transfusionRecente      Boolean
+  dernierDonDate          DateTime?
+  resultat                ResultatEligibilite
+  motif                   String              @db.VarChar(500)
+  dateCreation            DateTime            @default(now())
+
+  donneur                 Donneur             @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@index([donneurIdentifiant, dateCreation])
+  @@map("tests_eligibilite")
 }
 
 enum StatutDon {

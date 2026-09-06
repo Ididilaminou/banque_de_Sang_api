@@ -211,5 +211,6 @@ Cette route refuse toute nouvelle création dès qu'un administrateur existe.
 |----------|------|
 | `npm run dev` | Serveur en mode développement (recharge auto) |
 | `npm start` | Serveur en production |
+| `npm test` | Exécute les tests automatisés de l'API |
 | `npm run prisma:generate` | Génère le client Prisma |
 | `npm run prisma:migrate` | Applique les migrations MySQL |

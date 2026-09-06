@@ -35,26 +35,26 @@ module.exports = {
         type: "BANQUE_SANG",
         statut: "AUTORISE",
       },
-
-      trouverGestionnaireStockAutorise(identifiant) {
-        return prisma.etablissement.findFirst({
-          where: {
-            identifiant,
-            statut: "AUTORISE",
-            OR: [
-              { type: "BANQUE_SANG" },
-              { type: "HOPITAL", possedeBanqueSangInterne: true },
-            ],
-          },
-          select: {
-            identifiant: true,
-            nom: true,
-            type: true,
-            possedeBanqueSangInterne: true,
-          },
-        });
-      },
       select: { identifiant: true, nom: true },
+    });
+  },
+
+  trouverGestionnaireStockAutorise(identifiant) {
+    return prisma.etablissement.findFirst({
+      where: {
+        identifiant,
+        statut: "AUTORISE",
+        OR: [
+          { type: "BANQUE_SANG" },
+          { type: "HOPITAL", possedeBanqueSangInterne: true },
+        ],
+      },
+      select: {
+        identifiant: true,
+        nom: true,
+        type: true,
+        possedeBanqueSangInterne: true,
+      },
     });
   },
 
@@ -79,6 +79,14 @@ module.exports = {
     return prisma.etablissement.update({
       where: { identifiant },
       data: { statut },
+      select: selectionEtablissement,
+    });
+  },
+
+  modifierBanqueInterne(identifiant, possedeBanqueSangInterne) {
+    return prisma.etablissement.update({
+      where: { identifiant },
+      data: { possedeBanqueSangInterne },
       select: selectionEtablissement,
     });
   },

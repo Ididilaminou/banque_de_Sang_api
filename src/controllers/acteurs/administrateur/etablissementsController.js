@@ -110,4 +110,47 @@ async function modifierStatut(req, res, next) {
   }
 }
 
-module.exports = { creer, lister, modifierStatut };
+async function modifierBanqueInterne(req, res, next) {
+  const identifiant = Number(req.params.identifiant);
+  const { possedeBanqueSangInterne } = req.body;
+
+  if (
+    !Number.isInteger(identifiant) ||
+    typeof possedeBanqueSangInterne !== "boolean"
+  ) {
+    return res.status(400).json({
+      ok: false,
+      message: "L'identifiant ou le statut de la banque interne est invalide.",
+    });
+  }
+
+  try {
+    const existant = await etablissement.trouverPourRole(identifiant, "PERSONNEL_HOPITAL");
+    if (!existant) {
+      return res.status(404).json({
+        ok: false,
+        message: "Hôpital introuvable.",
+      });
+    }
+
+    return res.json({
+      ok: true,
+      message: "Configuration de la banque interne mise à jour.",
+      etablissement: await etablissement.modifierBanqueInterne(
+        identifiant,
+        possedeBanqueSangInterne,
+      ),
+    });
+  } catch (erreur) {
+    if (erreur.code === "P2025") {
+      return res.status(404).json({
+        ok: false,
+        message: "Hôpital introuvable.",
+      });
+    }
+
+    return next(erreur);
+  }
+}
+
+module.exports = { creer, lister, modifierStatut, modifierBanqueInterne };

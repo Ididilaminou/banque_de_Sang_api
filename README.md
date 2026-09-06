@@ -101,6 +101,8 @@ Un hôpital peut également posséder une banque de sang interne. Dans ce cas,
 l'administrateur crée l'établissement avec `possedeBanqueSangInterne: true`.
 Après autorisation de l'établissement, son personnel hospitalier peut gérer ses
 propres stocks, tandis que les autres hôpitaux restent limités à la consultation.
+Cette capacité peut aussi être modifiée avec
+`PATCH /etablissements/:identifiant/banque-interne`.
 - `GET /dons/donneur/:identifiant` permet au personnel habilité de consulter un historique.
 - `POST /stocks` permet au personnel de banque d'enregistrer un stock ;
 - `GET /stocks` permet au personnel autorisé de consulter les stocks de son établissement ;

@@ -18,6 +18,14 @@ module.exports = {
     });
   },
 
+  // Utilisé en interne pour vérifier qu'un profil donneur existe.
+  trouverParIdentifiantInterne(identifiant) {
+    return prisma.donneur.findUnique({
+      where: { identifiant },
+      select: { identifiant: true },
+    });
+  },
+
   enregistrer(utilisateurIdentifiant, groupeSanguin, rhesus) {
     return prisma.donneur.upsert({
       where: { utilisateurIdentifiant },

@@ -51,6 +51,12 @@ Les URLs existantes restent inchangées. Par exemple :
 - `POST /authentification/activation` permet au donneur d'activer son compte avec ce code.
 - `POST /administrateurs/personnel` permet à un administrateur de créer un compte du personnel.
 - `POST /installation/administrateur` permet de créer le premier administrateur.
+- `POST /dons` permet au personnel de banque d'enregistrer un don ;
+- `GET /dons/moi` permet au donneur de consulter son historique ;
+- `GET /dons/donneur/:identifiant` permet au personnel habilité de consulter un historique.
+- `POST /stocks` permet au personnel de banque d'enregistrer un stock ;
+- `GET /stocks` permet au personnel autorisé de consulter les stocks ;
+- `PATCH /stocks/:identifiant/quantite` permet de modifier une quantité.
 
 ### Activation d'un donneur
 

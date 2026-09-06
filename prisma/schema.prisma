@@ -67,10 +67,33 @@ model Donneur {
   dateDerniereDisponibilite DateTime?
   dateCreation             DateTime      @default(now())
   dateModification         DateTime      @updatedAt
+  dons                     Don[]
 
   utilisateur              Utilisateur   @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
 
   @@map("donneurs")
+}
+
+enum StatutDon {
+  ENREGISTRE
+  VALIDE
+  ANNULE
+}
+
+model Don {
+  identifiant            Int       @id @default(autoincrement())
+  donneurIdentifiant     Int
+  dateDon                DateTime
+  volumeMillilitres      Int
+  statut                 StatutDon @default(ENREGISTRE)
+  commentaire            String?   @db.VarChar(500)
+  dateCreation           DateTime  @default(now())
+  dateModification       DateTime  @updatedAt
+
+  donneur                Donneur   @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@index([donneurIdentifiant, dateDon])
+  @@map("dons")
 }
 
 model Etablissement {
@@ -84,8 +107,34 @@ model Etablissement {
   statut            StatutEtablissement @default(EN_ATTENTE)
   dateCreation      DateTime             @default(now())
   dateModification  DateTime             @updatedAt
+  stocks            Stock[]
 
   @@map("etablissements")
+}
+
+enum TypeProduitSanguin {
+  SANG_TOTAL
+  GLOBULES_ROUGES
+  PLAQUETTES
+  PLASMA
+}
+
+model Stock {
+  identifiant          Int                 @id @default(autoincrement())
+  etablissementIdentifiant Int
+  produit              TypeProduitSanguin
+  groupeSanguin        GroupeSanguin
+  rhesus               Rhesus
+  quantite             Int                 @default(0)
+  seuilAlerte          Int                 @default(5)
+  dateCreation         DateTime            @default(now())
+  dateModification     DateTime            @updatedAt
+
+  etablissement        Etablissement      @relation(fields: [etablissementIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@unique([etablissementIdentifiant, produit, groupeSanguin, rhesus])
+  @@index([groupeSanguin, rhesus, produit])
+  @@map("stocks")
 }
 
 model ActivationCompte {

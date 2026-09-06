@@ -11,11 +11,19 @@ const donneurConnecte = [
   exigerMotDePasseDefinitif,
   autoriserRoles("DONNEUR"),
 ];
+const professionnel = [
+  authentifierUtilisateur,
+  exigerMotDePasseDefinitif,
+  autoriserRoles("PERSONNEL_BANQUE", "ADMINISTRATEUR"),
+];
 
 // Le donneur remplit le questionnaire préliminaire.
 routeur.post("/", ...donneurConnecte, controleur.tester);
 
 // Le donneur consulte ses résultats précédents.
 routeur.get("/historique", ...donneurConnecte, controleur.historique);
+
+// Validation humaine obligatoire après l'analyse IA.
+routeur.patch("/:identifiant/validation", ...professionnel, controleur.validerParProfessionnel);
 
 module.exports = routeur;

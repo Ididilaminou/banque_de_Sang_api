@@ -18,6 +18,8 @@ const env = {
   adresseExpediteur: process.env.ADRESSE_EXPEDITEUR,
   urlApplication: process.env.URL_APPLICATION || "http://localhost:3000",
   nodeEnv: process.env.NODE_ENV || "development",
+  openaiApiKey: process.env.OPENAI_API_KEY,
+  openaiModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
 };
 
 module.exports = env;

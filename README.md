@@ -67,6 +67,12 @@ Les URLs existantes restent inchangées. Par exemple :
 - `PATCH /notifications/:identifiant/lue` permet de marquer une notification comme lue.
 - `POST /eligibilite` permet à un donneur de remplir le test préliminaire ;
 - `GET /eligibilite/historique` permet au donneur de consulter ses anciens tests.
+- `PATCH /eligibilite/:identifiant/validation` permet à un professionnel autorisé de valider ou refuser l'analyse IA.
+
+L'analyse d'éligibilité utilise OpenAI comme aide à la décision. Elle retourne une
+analyse et des recommandations, mais la décision finale doit obligatoirement être
+validée par un professionnel de santé. Configure `OPENAI_API_KEY` et, si besoin,
+`OPENAI_MODEL` dans `.env`.
 
 ### Activation d'un donneur
 

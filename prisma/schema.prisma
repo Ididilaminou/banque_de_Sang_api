@@ -94,9 +94,16 @@ model TestEligibilite {
   grossesseOuAllaitement  Boolean
   tatouageRecent          Boolean
   transfusionRecente      Boolean
+  operationRecente        Boolean
+  vaccinationRecente      Boolean
+  infectionRecente        Boolean
+  voyageRecent            Boolean
   dernierDonDate          DateTime?
   resultat                ResultatEligibilite
   motif                   String              @db.VarChar(500)
+  analyseIa               String?             @db.Text
+  recommandations        String?             @db.Text
+  validationProfessionnel Boolean             @default(false)
   dateCreation            DateTime            @default(now())
 
   donneur                 Donneur             @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)

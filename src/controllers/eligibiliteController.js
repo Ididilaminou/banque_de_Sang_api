@@ -1,5 +1,6 @@
 const donneur = require("../models/donneurModel");
 const eligibilite = require("../models/eligibiliteModel");
+const eligibiliteIa = require("../services/eligibiliteIaService");
 
 const reponsesBooleennes = [
   "fievreRecente",
@@ -8,6 +9,10 @@ const reponsesBooleennes = [
   "grossesseOuAllaitement",
   "tatouageRecent",
   "transfusionRecente",
+  "operationRecente",
+  "vaccinationRecente",
+  "infectionRecente",
+  "voyageRecent",
 ];
 
 function calculerResultat(donnees) {
@@ -100,17 +105,28 @@ async function tester(req, res, next) {
       grossesseOuAllaitement: donnees.grossesseOuAllaitement,
       tatouageRecent: donnees.tatouageRecent,
       transfusionRecente: donnees.transfusionRecente,
+      operationRecente: donnees.operationRecente,
+      vaccinationRecente: donnees.vaccinationRecente,
+      infectionRecente: donnees.infectionRecente,
+      voyageRecent: donnees.voyageRecent,
       dernierDonDate,
     };
-    const decision = calculerResultat(questionnaire);
+    const decisionRegles = calculerResultat(questionnaire);
+    const analyse = await eligibiliteIa.analyserQuestionnaire({
+      ...questionnaire,
+      avertissement: "Analyse préliminaire uniquement; validation médicale obligatoire.",
+    });
     const test = await eligibilite.creer({
       ...questionnaire,
-      ...decision,
+      resultat: analyse.resultat,
+      motif: decisionRegles.motif,
+      analyseIa: analyse.analyse,
+      recommandations: analyse.recommandations,
     });
 
     return res.status(201).json({
       ok: true,
-      message: "Test d'éligibilité enregistré. Une validation médicale reste nécessaire.",
+      message: "Analyse IA enregistrée. La décision finale appartient à un professionnel de santé.",
       test,
     });
   } catch (erreur) {
@@ -137,4 +153,36 @@ async function historique(req, res, next) {
   }
 }
 
-module.exports = { tester, historique };
+// Permet à un professionnel autorisé de confirmer ou refuser l'analyse IA.
+async function validerParProfessionnel(req, res, next) {
+  const identifiant = Number(req.params.identifiant);
+  const { valide } = req.body;
+
+  if (!Number.isInteger(identifiant) || typeof valide !== "boolean") {
+    return res.status(400).json({
+      ok: false,
+      message: "L'identifiant ou la validation est invalide.",
+    });
+  }
+
+  try {
+    const test = await eligibilite.validerParProfessionnel(identifiant, valide);
+    return res.json({
+      ok: true,
+      message: valide
+        ? "Analyse validée par un professionnel."
+        : "Analyse refusée par un professionnel.",
+      test,
+    });
+  } catch (erreur) {
+    if (erreur.code === "P2025") {
+      return res.status(404).json({
+        ok: false,
+        message: "Test d'éligibilité introuvable.",
+      });
+    }
+    return next(erreur);
+  }
+}
+
+module.exports = { tester, historique, validerParProfessionnel };

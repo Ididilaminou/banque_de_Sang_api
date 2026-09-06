@@ -11,9 +11,16 @@ const selectionTest = {
   grossesseOuAllaitement: true,
   tatouageRecent: true,
   transfusionRecente: true,
+  operationRecente: true,
+  vaccinationRecente: true,
+  infectionRecente: true,
+  voyageRecent: true,
   dernierDonDate: true,
   resultat: true,
   motif: true,
+  analyseIa: true,
+  recommandations: true,
+  validationProfessionnel: true,
   dateCreation: true,
 };
 
@@ -32,6 +39,15 @@ module.exports = {
       where: { donneurIdentifiant },
       select: selectionTest,
       orderBy: { dateCreation: "desc" },
+    });
+  },
+
+  // Enregistre la validation humaine finale du dossier.
+  validerParProfessionnel(identifiant, validationProfessionnel) {
+    return prisma.testEligibilite.update({
+      where: { identifiant },
+      data: { validationProfessionnel },
+      select: selectionTest,
     });
   },
 };

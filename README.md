@@ -49,6 +49,7 @@ Les URLs existantes restent inchangées. Par exemple :
 - `PATCH /etablissements/:identifiant/statut` permet de le valider ou le suspendre.
 - `POST /donneurs/:identifiant/verifier` permet à la banque de vérifier un donneur et de générer son code ;
 - `POST /authentification/activation` permet au donneur d'activer son compte avec ce code.
+- `POST /administrateurs/personnel` permet à un administrateur de créer un compte du personnel.
 
 ### Activation d'un donneur
 
@@ -76,6 +77,29 @@ POST /authentification/activation
   "codeActivation": "AID-7K4P9X"
 }
 ```
+
+### Création d'un compte du personnel
+
+Un administrateur utilise cette route :
+
+```http
+POST /administrateurs/personnel
+Authorization: Bearer JETON_ADMINISTRATEUR
+```
+
+```json
+{
+  "courriel": "personnel@example.com",
+  "prenom": "Jean",
+  "nom": "Personnel",
+  "telephone": "+237600000000",
+  "role": "PERSONNEL_BANQUE"
+}
+```
+
+Les rôles acceptés sont `PERSONNEL_BANQUE` et `PERSONNEL_HOPITAL`.
+Le mot de passe est temporairement retourné dans la réponse pour les tests
+locaux. Il sera envoyé par email après l'intégration de Gmail SMTP.
 
 ## Scripts
 

@@ -6,6 +6,7 @@ const routeurUtilisateursPrivees = require("./routes/privees/utilisateursRoutePr
 const routeurDonneursPrivees = require("./routes/privees/donneursRoutePrivee");
 const routeurEtablissementsPrivees = require("./routes/privees/etablissementsRoutePrivee");
 const routeurActivationDonneurPrivee = require("./routes/privees/activationDonneurRoutePrivee");
+const routeurPersonnelPrivee = require("./routes/privees/personnelRoutePrivee");
 
 // Création de l'application Express
 const app = express();
@@ -55,6 +56,7 @@ app.use("/utilisateurs", routeurUtilisateursPrivees);
 app.use("/donneurs", routeurDonneursPrivees);
 app.use("/etablissements", routeurEtablissementsPrivees);
 app.use("/donneurs", routeurActivationDonneurPrivee);
+app.use("/administrateurs/personnel", routeurPersonnelPrivee);
 
 // À placer en dernier pour intercepter les routes manquantes
 app.use(routeIntrouvable);

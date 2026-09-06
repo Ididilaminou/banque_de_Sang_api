@@ -2,6 +2,7 @@ const stock = require("../../../models/acteurs/banque/stockModel");
 const notification = require("../../../models/acteurs/commun/notificationModel");
 const { lirePagination } = require("../../../utils/pagination");
 const audit = require("../../../models/acteurs/commun/auditModel");
+const etablissement = require("../../../models/acteurs/administrateur/etablissementModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -46,6 +47,19 @@ async function enregistrer(req, res, next) {
   }
 
   try {
+    if (req.utilisateur.role === "ADMINISTRATEUR") {
+      const banque = await etablissement.trouverBanqueAutorisee(
+        identifiantEtablissement,
+      );
+
+      if (!banque) {
+        return res.status(403).json({
+          ok: false,
+          message: "Le stock doit être rattaché à une banque de sang autorisée.",
+        });
+      }
+    }
+
     const stockAvant = await stock.trouverQuantite(
       identifiantEtablissement,
       produit,
@@ -151,6 +165,19 @@ async function modifierQuantite(req, res, next) {
         stockExistant.etablissementIdentifiant !== req.utilisateur.etablissementIdentifiant)
     ) {
       return res.status(404).json({ ok: false, message: "Stock introuvable." });
+    }
+
+    if (req.utilisateur.role === "ADMINISTRATEUR") {
+      const banque = await etablissement.trouverBanqueAutorisee(
+        stockExistant.etablissementIdentifiant,
+      );
+
+      if (!banque) {
+        return res.status(403).json({
+          ok: false,
+          message: "Le stock doit appartenir à une banque de sang autorisée.",
+        });
+      }
     }
 
     const type = quantite > stockExistant.quantite ? "ENTREE" : "SORTIE";

@@ -61,6 +61,7 @@ model Utilisateur {
   dossierAdministrateur DossierAdministrateur?
   mouvementsStock    MouvementStock[]
   historiquesDemandes HistoriqueDemandeSang[]
+  journauxAudit      JournalAudit[]
 
   @@map("utilisateurs")
 }
@@ -260,6 +261,22 @@ model HistoriqueDemandeSang {
 
   @@index([demandeSangIdentifiant, dateCreation])
   @@map("historiques_demandes_sang")
+}
+
+model JournalAudit {
+  identifiant            Int       @id @default(autoincrement())
+  utilisateurIdentifiant Int
+  action                 String    @db.VarChar(80)
+  ressource              String    @db.VarChar(80)
+  ressourceIdentifiant   Int?
+  details                String?   @db.Text
+  dateCreation           DateTime  @default(now())
+
+  utilisateur            Utilisateur @relation(fields: [utilisateurIdentifiant], references: [identifiant])
+
+  @@index([ressource, ressourceIdentifiant, dateCreation])
+  @@index([utilisateurIdentifiant, dateCreation])
+  @@map("journaux_audit")
 }
 
 enum StatutRecommandation {

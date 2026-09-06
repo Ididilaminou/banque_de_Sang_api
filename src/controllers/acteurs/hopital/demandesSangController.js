@@ -4,6 +4,7 @@ const stock = require("../../../models/acteurs/banque/stockModel");
 const donneur = require("../../../models/acteurs/donneur/donneurModel");
 const etablissement = require("../../../models/acteurs/administrateur/etablissementModel");
 const { lirePagination } = require("../../../utils/pagination");
+const audit = require("../../../models/acteurs/commun/auditModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -182,6 +183,13 @@ async function modifier(req, res, next) {
         etablissementDestinataireId === undefined
           ? undefined
           : Number(etablissementDestinataireId),
+    });
+    await audit.creer({
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      action: "MODIFIER_STATUT_DEMANDE",
+      ressource: "DEMANDE_SANG",
+      ressourceIdentifiant: identifiant,
+      details: JSON.stringify({ ancienStatut: demandeAvant.statut, nouveauStatut: statut }),
     });
     await demandeSang.creerHistorique({
       demandeSangIdentifiant: identifiant,

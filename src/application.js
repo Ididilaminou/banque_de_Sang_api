@@ -13,6 +13,7 @@ const routeurDemandesSangPrivee = require("./routes/acteurs/hopital/demandesSang
 const routeurNotificationsPrivee = require("./routes/acteurs/commun/notificationsRoutePrivee");
 const routeurEligibilitePrivee = require("./routes/acteurs/donneur/eligibiliteRoutePrivee");
 const routeurInstallationPublique = require("./routes/acteurs/administrateur/installationRoutePublique");
+const routeurAuditPrivee = require("./routes/acteurs/administrateur/auditRoutePrivee");
 
 // Création de l'application Express
 const app = express();
@@ -69,6 +70,7 @@ app.use("/demandes-sang", routeurDemandesSangPrivee);
 app.use("/notifications", routeurNotificationsPrivee);
 app.use("/eligibilite", routeurEligibilitePrivee);
 app.use("/installation/administrateur", routeurInstallationPublique);
+app.use("/audit", routeurAuditPrivee);
 
 // À placer en dernier pour intercepter les routes manquantes
 app.use(routeIntrouvable);

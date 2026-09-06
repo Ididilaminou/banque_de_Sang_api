@@ -1,6 +1,7 @@
 const stock = require("../../../models/acteurs/banque/stockModel");
 const notification = require("../../../models/acteurs/commun/notificationModel");
 const { lirePagination } = require("../../../utils/pagination");
+const audit = require("../../../models/acteurs/commun/auditModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -67,6 +68,13 @@ async function enregistrer(req, res, next) {
       ancienneQuantite: stockAvant ? stockAvant.quantite : 0,
       nouvelleQuantite: quantite,
       commentaire: "Création ou remplacement initial du stock.",
+    });
+    await audit.creer({
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      action: "ENREGISTRER_STOCK",
+      ressource: "STOCK",
+      ressourceIdentifiant: resultat.identifiant,
+      details: JSON.stringify({ quantite, produit, groupeSanguin, rhesus }),
     });
 
     return res.json({
@@ -153,6 +161,13 @@ async function modifierQuantite(req, res, next) {
       type,
       ancienneQuantite: stockExistant.quantite,
       nouvelleQuantite: quantite,
+    });
+    await audit.creer({
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      action: "MODIFIER_QUANTITE_STOCK",
+      ressource: "STOCK",
+      ressourceIdentifiant: identifiant,
+      details: JSON.stringify({ ancienneQuantite: stockExistant.quantite, nouvelleQuantite: quantite }),
     });
 
     if (quantite <= resultat.seuilAlerte) {

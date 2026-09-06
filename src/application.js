@@ -14,6 +14,7 @@ const routeurNotificationsPrivee = require("./routes/acteurs/commun/notification
 const routeurEligibilitePrivee = require("./routes/acteurs/donneur/eligibiliteRoutePrivee");
 const routeurInstallationPublique = require("./routes/acteurs/administrateur/installationRoutePublique");
 const routeurAuditPrivee = require("./routes/acteurs/administrateur/auditRoutePrivee");
+const routeurStatistiquesPrivee = require("./routes/acteurs/administrateur/statistiquesRoutePrivee");
 
 // Création de l'application Express
 const app = express();
@@ -89,6 +90,7 @@ app.use("/notifications", routeurNotificationsPrivee);
 app.use("/eligibilite", routeurEligibilitePrivee);
 app.use("/installation/administrateur", routeurInstallationPublique);
 app.use("/audit", routeurAuditPrivee);
+app.use("/statistiques", routeurStatistiquesPrivee);
 
 // À placer en dernier pour intercepter les routes manquantes
 app.use(routeIntrouvable);

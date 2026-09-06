@@ -127,6 +127,16 @@ Cette capacité peut aussi être modifiée avec
 - `PATCH /demandes-sang/:identifiant` permet à la banque de traiter une demande.
 - `GET /demandes-sang/:identifiant/historique` permet de consulter les changements de statut et leur auteur.
 - `GET /audit` permet à l'administrateur de consulter le journal des opérations.
+- `GET /statistiques` fournit les statistiques globales à l'administrateur.
+- `GET /statistiques/etablissement/:identifiant` fournit les statistiques d'un
+  établissement à l'administrateur ou au personnel rattaché.
+
+Les statistiques globales comprennent les donneurs, dons non annulés,
+établissements par type et statut, personnels par rôle, demandes par statut,
+demandes urgentes, stocks par produit/groupe/Rhésus et stocks faibles.
+Les statistiques d'un établissement comprennent ses personnels, stocks,
+stocks faibles, demandes émises et reçues par statut, demandes urgentes et
+mouvements de stock.
 
 ### Rôles et périmètres
 

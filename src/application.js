@@ -4,6 +4,7 @@ const routeurAuthentificationPublique = require("./routes/public/authentificatio
 const routeurAuthentificationPrivee = require("./routes/privees/authentificationRoutePrivee");
 const routeurUtilisateursPrivees = require("./routes/privees/utilisateursRoutePrivee");
 const routeurDonneursPrivees = require("./routes/privees/donneursRoutePrivee");
+const routeurEtablissementsPrivees = require("./routes/privees/etablissementsRoutePrivee");
 
 // Création de l'application Express
 const app = express();
@@ -51,6 +52,7 @@ app.use("/authentification", routeurAuthentificationPrivee);
 // Préfixe des routes utilisateurs
 app.use("/utilisateurs", routeurUtilisateursPrivees);
 app.use("/donneurs", routeurDonneursPrivees);
+app.use("/etablissements", routeurEtablissementsPrivees);
 
 // À placer en dernier pour intercepter les routes manquantes
 app.use(routeIntrouvable);

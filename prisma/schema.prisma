@@ -28,6 +28,17 @@ enum Rhesus {
   NEGATIF
 }
 
+enum TypeEtablissement {
+  BANQUE_SANG
+  HOPITAL
+}
+
+enum StatutEtablissement {
+  EN_ATTENTE
+  AUTORISE
+  SUSPENDU
+}
+
 model Utilisateur {
   identifiant       Int      @id @default(autoincrement())
   courriel          String   @unique @db.VarChar(255)
@@ -58,4 +69,19 @@ model Donneur {
   utilisateur              Utilisateur   @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
 
   @@map("donneurs")
+}
+
+model Etablissement {
+  identifiant       Int                  @id @default(autoincrement())
+  nom               String               @db.VarChar(150)
+  type              TypeEtablissement
+  adresse           String               @db.VarChar(255)
+  ville             String               @db.VarChar(100)
+  telephone         String?              @db.VarChar(30)
+  courriel          String               @unique @db.VarChar(255)
+  statut            StatutEtablissement @default(EN_ATTENTE)
+  dateCreation      DateTime             @default(now())
+  dateModification  DateTime             @updatedAt
+
+  @@map("etablissements")
 }

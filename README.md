@@ -45,6 +45,8 @@ Les URLs existantes restent inchangées. Par exemple :
 - `POST /authentification/connexion` est une route publique ;
 - `GET /utilisateurs/moi` est une route privée ;
 - `GET /donneurs/recherche` est une route privée avec contrôle de rôle.
+- `POST /etablissements` permet à un administrateur de créer un établissement ;
+- `PATCH /etablissements/:identifiant/statut` permet de le valider ou le suspendre.
 
 ## Scripts
 

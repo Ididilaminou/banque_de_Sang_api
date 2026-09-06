@@ -16,6 +16,18 @@ enum Role {
   ADMINISTRATEUR
 }
 
+enum GroupeSanguin {
+  A
+  B
+  AB
+  O
+}
+
+enum Rhesus {
+  POSITIF
+  NEGATIF
+}
+
 model Utilisateur {
   identifiant       Int      @id @default(autoincrement())
   courriel          String   @unique @db.VarChar(255)
@@ -28,5 +40,22 @@ model Utilisateur {
   dateCreation      DateTime @default(now())
   dateModification  DateTime @updatedAt
 
+  donneur           Donneur?
+
   @@map("utilisateurs")
+}
+
+model Donneur {
+  identifiant              Int           @id @default(autoincrement())
+  utilisateurIdentifiant   Int           @unique
+  groupeSanguin            GroupeSanguin
+  rhesus                   Rhesus
+  estDisponible            Boolean       @default(false)
+  dateDerniereDisponibilite DateTime?
+  dateCreation             DateTime      @default(now())
+  dateModification         DateTime      @updatedAt
+
+  utilisateur              Utilisateur   @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@map("donneurs")
 }

@@ -23,52 +23,6 @@ const selectionDemande = {
 };
 
 module.exports = {
-  // Récupère une demande avant une opération de recommandation.
-  trouverParIdentifiant(identifiant) {
-    return prisma.demandeSang.findUnique({
-      where: { identifiant },
-      select: {
-        identifiant: true,
-        produit: true,
-        groupeSanguin: true,
-        rhesus: true,
-        quantite: true,
-        statut: true,
-      },
-
-      trouverRecommandationPourDonneur(demandeSangIdentifiant, donneurIdentifiant) {
-        return prisma.recommandationDonneur.findUnique({
-          where: {
-            demandeSangIdentifiant_donneurIdentifiant: {
-              demandeSangIdentifiant,
-              donneurIdentifiant,
-            },
-          },
-          select: { identifiant: true, statut: true },
-        });
-      },
-
-      enregistrerRecommandations(demandeSangIdentifiant, donneurs) {
-        return prisma.recommandationDonneur.createMany({
-          data: donneurs.map((donneur) => ({
-            demandeSangIdentifiant,
-            donneurIdentifiant: donneur.identifiant,
-          })),
-          skipDuplicates: true,
-        });
-      },
-
-      repondreRecommandation(identifiant, statut) {
-        return prisma.recommandationDonneur.update({
-          where: { identifiant },
-          data: { statut, dateReponse: new Date() },
-          select: { identifiant: true, demandeSangIdentifiant: true, statut: true },
-        });
-      },
-    });
-  },
-
-  // Crée une demande dans la base de données.
   creer(donnees) {
     return prisma.demandeSang.create({
       data: donnees,
@@ -76,7 +30,6 @@ module.exports = {
     });
   },
 
-  // Liste les demandes selon les filtres reçus.
   lister(filtres) {
     return prisma.demandeSang.findMany({
       where: filtres,
@@ -85,12 +38,74 @@ module.exports = {
     });
   },
 
-  // Met à jour le statut ou l'établissement destinataire.
+  trouverParIdentifiant(identifiant) {
+    return prisma.demandeSang.findUnique({
+      where: { identifiant },
+      select: {
+        ...selectionDemande,
+        recommandations: {
+          select: { identifiant: true, donneurIdentifiant: true, statut: true },
+        },
+      },
+    });
+  },
+
   modifier(identifiant, donnees) {
     return prisma.demandeSang.update({
       where: { identifiant },
       data: donnees,
       select: selectionDemande,
+    });
+  },
+
+  creerHistorique(donnees) {
+    return prisma.historiqueDemandeSang.create({ data: donnees });
+  },
+
+  listerHistorique(demandeSangIdentifiant) {
+    return prisma.historiqueDemandeSang.findMany({
+      where: { demandeSangIdentifiant },
+      select: {
+        identifiant: true,
+        ancienStatut: true,
+        nouveauStatut: true,
+        commentaire: true,
+        dateCreation: true,
+        utilisateur: {
+          select: { identifiant: true, prenom: true, nom: true, role: true },
+        },
+      },
+      orderBy: { dateCreation: "desc" },
+    });
+  },
+
+  trouverRecommandationPourDonneur(demandeSangIdentifiant, donneurIdentifiant) {
+    return prisma.recommandationDonneur.findUnique({
+      where: {
+        demandeSangIdentifiant_donneurIdentifiant: {
+          demandeSangIdentifiant,
+          donneurIdentifiant,
+        },
+      },
+      select: { identifiant: true, statut: true },
+    });
+  },
+
+  enregistrerRecommandations(demandeSangIdentifiant, donneurs) {
+    return prisma.recommandationDonneur.createMany({
+      data: donneurs.map((donneur) => ({
+        demandeSangIdentifiant,
+        donneurIdentifiant: donneur.identifiant,
+      })),
+      skipDuplicates: true,
+    });
+  },
+
+  repondreRecommandation(identifiant, statut) {
+    return prisma.recommandationDonneur.update({
+      where: { identifiant },
+      data: { statut, dateReponse: new Date() },
+      select: { identifiant: true, demandeSangIdentifiant: true, statut: true },
     });
   },
 };

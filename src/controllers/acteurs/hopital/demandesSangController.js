@@ -21,6 +21,15 @@ const statutsAutorises = new Set([
   "ANNULEE",
 ]);
 
+const transitionsAutorisees = {
+  EN_ATTENTE: new Set(["EN_COURS", "ANNULEE", "REJETEE"]),
+  EN_COURS: new Set(["ACCEPTEE", "REJETEE", "ANNULEE"]),
+  ACCEPTEE: new Set(["LIVREE", "ANNULEE"]),
+  REJETEE: new Set(),
+  LIVREE: new Set(),
+  ANNULEE: new Set(),
+};
+
 // Permet à un hôpital de signaler un besoin en produits sanguins.
 async function creer(req, res, next) {
   const {
@@ -150,12 +159,30 @@ async function modifier(req, res, next) {
   }
 
   try {
+    const demandeAvant = await demandeSang.trouverParIdentifiant(identifiant);
+    if (!demandeAvant) {
+      return res.status(404).json({ ok: false, message: "Demande introuvable." });
+    }
+    if (!transitionsAutorisees[demandeAvant.statut].has(statut)) {
+      return res.status(409).json({
+        ok: false,
+        message: `Transition impossible : ${demandeAvant.statut} vers ${statut}.`,
+      });
+    }
+
     const resultat = await demandeSang.modifier(identifiant, {
       statut,
       etablissementDestinataireId:
         etablissementDestinataireId === undefined
           ? undefined
           : Number(etablissementDestinataireId),
+    });
+    await demandeSang.creerHistorique({
+      demandeSangIdentifiant: identifiant,
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      ancienStatut: demandeAvant.statut,
+      nouveauStatut: statut,
+      commentaire: "Changement de statut effectué par le personnel.",
     });
 
     await notification.notifierRoles({
@@ -178,6 +205,26 @@ async function modifier(req, res, next) {
         message: "Demande ou établissement introuvable.",
       });
     }
+
+    return next(erreur);
+  }
+}
+
+// Retourne la traçabilité complète d'une demande.
+async function historique(req, res, next) {
+  const identifiant = Number(req.params.identifiant);
+  if (!Number.isInteger(identifiant)) {
+    return res.status(400).json({ ok: false, message: "Identifiant invalide." });
+  }
+
+  try {
+    const historiqueDemande = await demandeSang.listerHistorique(identifiant);
+    return res.json({
+      ok: true,
+      nombre: historiqueDemande.length,
+      historique: historiqueDemande,
+    });
+  } catch (erreur) {
     return next(erreur);
   }
 }
@@ -324,6 +371,7 @@ module.exports = {
   creer,
   lister,
   modifier,
+  historique,
   recommanderDonneurs,
   repondreRecommandation,
 };

@@ -1,6 +1,5 @@
-// Schéma Prisma : la "carte" de ta base MySQL.
-// Étape 0 : on déclare seulement le moteur (MySQL).
-// Étape 1 : on ajoutera les modèles (User, Donneur, Don, etc.).
+// Schéma Prisma : la "carte" de la base MySQL.
+// Les modèles et attributs métier sont nommés en français.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,23 +10,23 @@ datasource db {
 }
 
 enum Role {
-  DONOR
-  BLOOD_BANK_STAFF
-  HOSPITAL_STAFF
-  ADMIN
+  DONNEUR
+  PERSONNEL_BANQUE
+  PERSONNEL_HOPITAL
+  ADMINISTRATEUR
 }
 
-model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @db.VarChar(255)
-  firstName    String   @db.VarChar(100)
-  lastName     String   @db.VarChar(100)
-  phone        String?  @db.VarChar(30)
-  role         Role     @default(DONOR)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model Utilisateur {
+  identifiant       Int      @id @default(autoincrement())
+  courriel          String   @unique @db.VarChar(255)
+  motDePasseHash    String   @db.VarChar(255)
+  prenom            String   @db.VarChar(100)
+  nom               String   @db.VarChar(100)
+  telephone         String?  @db.VarChar(30)
+  role              Role     @default(DONNEUR)
+  estActif          Boolean  @default(true)
+  dateCreation      DateTime @default(now())
+  dateModification  DateTime @updatedAt
 
-  @@map("users")
+  @@map("utilisateurs")
 }

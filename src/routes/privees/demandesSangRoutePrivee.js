@@ -34,4 +34,7 @@ routeur.get("/", ...personnelHabilite, controleur.lister);
 // La banque ou l'administrateur traite une demande.
 routeur.patch("/:identifiant", ...gestionnaire, controleur.modifier);
 
+// La banque recommande des donneurs si son stock est insuffisant.
+routeur.post("/:identifiant/recommander-donneurs", ...gestionnaire, controleur.recommanderDonneurs);
+
 module.exports = routeur;

@@ -23,6 +23,21 @@ const selectionDemande = {
 };
 
 module.exports = {
+  // Récupère une demande avant une opération de recommandation.
+  trouverParIdentifiant(identifiant) {
+    return prisma.demandeSang.findUnique({
+      where: { identifiant },
+      select: {
+        identifiant: true,
+        produit: true,
+        groupeSanguin: true,
+        rhesus: true,
+        quantite: true,
+        statut: true,
+      },
+    });
+  },
+
   // Crée une demande dans la base de données.
   creer(donnees) {
     return prisma.demandeSang.create({

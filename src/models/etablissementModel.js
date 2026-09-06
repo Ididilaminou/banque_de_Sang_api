@@ -14,6 +14,18 @@ const selectionEtablissement = {
 };
 
 module.exports = {
+  // Vérifie qu'un établissement est bien une banque autorisée.
+  trouverBanqueAutorisee(identifiant) {
+    return prisma.etablissement.findFirst({
+      where: {
+        identifiant,
+        type: "BANQUE_SANG",
+        statut: "AUTORISE",
+      },
+      select: { identifiant: true, nom: true },
+    });
+  },
+
   creer(donnees) {
     return prisma.etablissement.create({
       data: donnees,

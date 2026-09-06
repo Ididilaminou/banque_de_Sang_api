@@ -60,6 +60,7 @@ Les URLs existantes restent inchangées. Par exemple :
 - `POST /demandes-sang` permet à un hôpital de créer une demande ;
 - `GET /demandes-sang` permet au personnel habilité de consulter les demandes ;
 - `PATCH /demandes-sang/:identifiant` permet à la banque de traiter une demande.
+- `POST /demandes-sang/:identifiant/recommander-donneurs` permet à une banque de notifier les donneurs compatibles lorsque son stock est insuffisant.
 - `GET /notifications` permet de consulter ses notifications ;
 - `GET /notifications?nonLues=true` permet de consulter uniquement les notifications non lues ;
 - `PATCH /notifications/:identifiant/lue` permet de marquer une notification comme lue.

@@ -67,4 +67,21 @@ module.exports = {
       orderBy: { dateModification: "desc" },
     });
   },
+
+  // Recherche uniquement les donneurs actifs et compatibles avec une demande.
+  rechercherDisponiblesCompatibles(groupeSanguin, rhesus) {
+    return prisma.donneur.findMany({
+      where: {
+        groupeSanguin,
+        rhesus,
+        estDisponible: true,
+        utilisateur: { estActif: true },
+      },
+      select: {
+        identifiant: true,
+        utilisateurIdentifiant: true,
+      },
+      orderBy: { dateDerniereDisponibilite: "desc" },
+    });
+  },
 };

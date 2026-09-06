@@ -46,6 +46,23 @@ module.exports = {
     });
   },
 
+  // Informe les donneurs compatibles sans révéler leurs coordonnées dans la réponse.
+  async notifierDonneurs({ donneurs, demandeSangIdentifiant, titre, message }) {
+    if (donneurs.length === 0) {
+      return;
+    }
+
+    await prisma.notification.createMany({
+      data: donneurs.map((donneur) => ({
+        utilisateurIdentifiant: donneur.utilisateurIdentifiant,
+        demandeSangIdentifiant,
+        type: "RECOMMANDATION_DONNEUR",
+        titre,
+        message,
+      })),
+    });
+  },
+
   // Marque une notification appartenant à l'utilisateur comme lue.
   marquerCommeLue(identifiant, utilisateurIdentifiant) {
     return prisma.notification.updateMany({

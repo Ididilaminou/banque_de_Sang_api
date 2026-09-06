@@ -1,5 +1,8 @@
 const demandeSang = require("../models/demandeSangModel");
 const notification = require("../models/notificationModel");
+const stock = require("../models/stockModel");
+const donneur = require("../models/donneurModel");
+const etablissement = require("../models/etablissementModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -169,4 +172,81 @@ async function modifier(req, res, next) {
   }
 }
 
-module.exports = { creer, lister, modifier };
+// Recommande des donneurs compatibles lorsque le stock de la banque est insuffisant.
+async function recommanderDonneurs(req, res, next) {
+  const identifiant = Number(req.params.identifiant);
+  const etablissementIdentifiant = Number(req.body.etablissementIdentifiant);
+
+  if (!Number.isInteger(identifiant) || !Number.isInteger(etablissementIdentifiant)) {
+    return res.status(400).json({
+      ok: false,
+      message: "L'identifiant de la demande ou de l'établissement est invalide.",
+    });
+  }
+
+  try {
+    const banque = await etablissement.trouverBanqueAutorisee(etablissementIdentifiant);
+
+    if (!banque) {
+      return res.status(404).json({
+        ok: false,
+        message: "Banque de sang autorisée introuvable.",
+      });
+    }
+
+    const demande = await demandeSang.trouverParIdentifiant(identifiant);
+
+    if (!demande) {
+      return res.status(404).json({
+        ok: false,
+        message: "Demande de sang introuvable.",
+      });
+    }
+
+    if (["LIVREE", "ANNULEE", "REJETEE"].includes(demande.statut)) {
+      return res.status(409).json({
+        ok: false,
+        message: "Cette demande ne peut plus recevoir de recommandation.",
+      });
+    }
+
+    const stockDisponible = await stock.trouverQuantite(
+      etablissementIdentifiant,
+      demande.produit,
+      demande.groupeSanguin,
+      demande.rhesus,
+    );
+    const quantiteDisponible = stockDisponible ? stockDisponible.quantite : 0;
+
+    if (quantiteDisponible >= demande.quantite) {
+      return res.status(409).json({
+        ok: false,
+        message: "Le stock disponible suffit pour cette demande.",
+      });
+    }
+
+    const donneurs = await donneur.rechercherDisponiblesCompatibles(
+      demande.groupeSanguin,
+      demande.rhesus,
+    );
+
+    await notification.notifierDonneurs({
+      donneurs,
+      demandeSangIdentifiant: demande.identifiant,
+      titre: "Besoin urgent de don compatible",
+      message: `Une demande nécessite du ${demande.produit} de groupe ${demande.groupeSanguin} ${demande.rhesus}. Votre disponibilité peut aider.`,
+    });
+
+    return res.json({
+      ok: true,
+      message: donneurs.length
+        ? "Les donneurs compatibles ont été notifiés."
+        : "Aucun donneur compatible et disponible n'a été trouvé.",
+      nombreDonneursNotifies: donneurs.length,
+    });
+  } catch (erreur) {
+    return next(erreur);
+  }
+}
+
+module.exports = { creer, lister, modifier, recommanderDonneurs };

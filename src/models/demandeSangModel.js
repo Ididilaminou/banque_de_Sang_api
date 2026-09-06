@@ -1,0 +1,51 @@
+const prisma = require("../config/prismaConfig");
+
+// Cette sélection définit les informations visibles dans les réponses API.
+const selectionDemande = {
+  identifiant: true,
+  etablissementDemandeurId: true,
+  etablissementDestinataireId: true,
+  produit: true,
+  groupeSanguin: true,
+  rhesus: true,
+  quantite: true,
+  urgence: true,
+  motif: true,
+  statut: true,
+  dateCreation: true,
+  dateModification: true,
+  etablissementDemandeur: {
+    select: { identifiant: true, nom: true, ville: true },
+  },
+  etablissementDestinataire: {
+    select: { identifiant: true, nom: true, ville: true },
+  },
+};
+
+module.exports = {
+  // Crée une demande dans la base de données.
+  creer(donnees) {
+    return prisma.demandeSang.create({
+      data: donnees,
+      select: selectionDemande,
+    });
+  },
+
+  // Liste les demandes selon les filtres reçus.
+  lister(filtres) {
+    return prisma.demandeSang.findMany({
+      where: filtres,
+      select: selectionDemande,
+      orderBy: [{ urgence: "desc" }, { dateCreation: "desc" }],
+    });
+  },
+
+  // Met à jour le statut ou l'établissement destinataire.
+  modifier(identifiant, donnees) {
+    return prisma.demandeSang.update({
+      where: { identifiant },
+      data: donnees,
+      select: selectionDemande,
+    });
+  },
+};

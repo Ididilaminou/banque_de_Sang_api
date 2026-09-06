@@ -108,8 +108,40 @@ model Etablissement {
   dateCreation      DateTime             @default(now())
   dateModification  DateTime             @updatedAt
   stocks            Stock[]
+  demandesEmises    DemandeSang[]       @relation("EtablissementDemandeur")
+  demandesRecues    DemandeSang[]       @relation("EtablissementDestinataire")
 
   @@map("etablissements")
+}
+
+enum StatutDemandeSang {
+  EN_ATTENTE
+  EN_COURS
+  ACCEPTEE
+  REJETEE
+  LIVREE
+  ANNULEE
+}
+
+model DemandeSang {
+  identifiant                    Int                @id @default(autoincrement())
+  etablissementDemandeurId      Int
+  etablissementDestinataireId   Int?
+  produit                       TypeProduitSanguin
+  groupeSanguin                 GroupeSanguin
+  rhesus                        Rhesus
+  quantite                      Int
+  urgence                       Boolean            @default(false)
+  motif                         String             @db.VarChar(500)
+  statut                        StatutDemandeSang  @default(EN_ATTENTE)
+  dateCreation                  DateTime           @default(now())
+  dateModification              DateTime           @updatedAt
+
+  etablissementDemandeur        Etablissement      @relation("EtablissementDemandeur", fields: [etablissementDemandeurId], references: [identifiant])
+  etablissementDestinataire     Etablissement?     @relation("EtablissementDestinataire", fields: [etablissementDestinataireId], references: [identifiant])
+
+  @@index([statut, urgence])
+  @@map("demandes_sang")
 }
 
 enum TypeProduitSanguin {

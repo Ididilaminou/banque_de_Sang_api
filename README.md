@@ -57,6 +57,9 @@ Les URLs existantes restent inchangées. Par exemple :
 - `POST /stocks` permet au personnel de banque d'enregistrer un stock ;
 - `GET /stocks` permet au personnel autorisé de consulter les stocks ;
 - `PATCH /stocks/:identifiant/quantite` permet de modifier une quantité.
+- `POST /demandes-sang` permet à un hôpital de créer une demande ;
+- `GET /demandes-sang` permet au personnel habilité de consulter les demandes ;
+- `PATCH /demandes-sang/:identifiant` permet à la banque de traiter une demande.
 
 ### Activation d'un donneur
 

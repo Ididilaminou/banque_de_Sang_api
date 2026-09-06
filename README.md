@@ -89,6 +89,9 @@ Les URLs existantes restent inchangées. Par exemple :
 - `GET /demandes-sang/:identifiant/historique` permet de consulter les changements de statut et leur auteur.
 - `GET /audit` permet à l'administrateur de consulter le journal des opérations.
 
+Les notifications de changement de demande sont ciblées sur l'établissement
+concerné. Elles ne sont pas envoyées à tous les hôpitaux.
+
 Les listes acceptent `page` et `limite` (de 1 à 100), par exemple :
 `GET /demandes-sang?page=1&limite=20`.
 - `POST /demandes-sang/:identifiant/recommander-donneurs` permet à une banque de notifier les donneurs compatibles lorsque son stock est insuffisant.

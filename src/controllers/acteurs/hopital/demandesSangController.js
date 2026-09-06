@@ -76,6 +76,20 @@ async function creer(req, res, next) {
       urgence,
       motif: motif.trim(),
     });
+    await audit.creer({
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      action: "CREER_DEMANDE_SANG",
+      ressource: "DEMANDE_SANG",
+      ressourceIdentifiant: resultat.identifiant,
+      details: JSON.stringify({
+        etablissementDemandeurId: identifiantDemandeur,
+        produit,
+        groupeSanguin,
+        rhesus,
+        quantite,
+        urgence,
+      }),
+    });
 
     await notification.notifierRoles({
       roles: ["PERSONNEL_BANQUE", "ADMINISTRATEUR"],
@@ -199,9 +213,8 @@ async function modifier(req, res, next) {
       commentaire: "Changement de statut effectué par le personnel.",
     });
 
-    await notification.notifierRoles({
-      roles: ["PERSONNEL_HOPITAL", "ADMINISTRATEUR"],
-      demandeSangIdentifiant: resultat.identifiant,
+    await notification.notifierEtablissement({
+      etablissementIdentifiant: resultat.etablissementDemandeurId,
       type: "DEMANDE_SANG_MISE_A_JOUR",
       titre: "Mise à jour d'une demande de sang",
       message: `La demande n°${resultat.identifiant} est maintenant ${statut}.`,
@@ -311,6 +324,13 @@ async function recommanderDonneurs(req, res, next) {
       demandeSangIdentifiant: demande.identifiant,
       titre: "Besoin urgent de don compatible",
       message: `Une demande nécessite du ${demande.produit} de groupe ${demande.groupeSanguin} ${demande.rhesus}. Votre disponibilité peut aider.`,
+    });
+    await audit.creer({
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      action: "RECOMMANDER_DONNEURS",
+      ressource: "DEMANDE_SANG",
+      ressourceIdentifiant: demande.identifiant,
+      details: JSON.stringify({ nombreDonneursNotifies: donneurs.length }),
     });
 
     return res.json({

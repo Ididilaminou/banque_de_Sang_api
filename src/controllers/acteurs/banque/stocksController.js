@@ -1,4 +1,5 @@
 const stock = require("../../../models/acteurs/banque/stockModel");
+const notification = require("../../../models/acteurs/commun/notificationModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -43,6 +44,12 @@ async function enregistrer(req, res, next) {
   }
 
   try {
+    const stockAvant = await stock.trouverQuantite(
+      identifiantEtablissement,
+      produit,
+      groupeSanguin,
+      rhesus,
+    );
     const resultat = await stock.enregistrer({
       etablissementIdentifiant: identifiantEtablissement,
       produit,
@@ -50,6 +57,15 @@ async function enregistrer(req, res, next) {
       rhesus,
       quantite,
       seuilAlerte,
+    });
+
+    await stock.creerMouvement({
+      stockIdentifiant: resultat.identifiant,
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      type: "AJUSTEMENT",
+      ancienneQuantite: stockAvant ? stockAvant.quantite : 0,
+      nouvelleQuantite: quantite,
+      commentaire: "Création ou remplacement initial du stock.",
     });
 
     return res.json({
@@ -117,10 +133,38 @@ async function modifierQuantite(req, res, next) {
   }
 
   try {
+    const stockExistant = await stock.trouverParIdentifiant(identifiant);
+    if (
+      !stockExistant ||
+      (req.utilisateur.role === "PERSONNEL_BANQUE" &&
+        stockExistant.etablissementIdentifiant !== req.utilisateur.etablissementIdentifiant)
+    ) {
+      return res.status(404).json({ ok: false, message: "Stock introuvable." });
+    }
+
+    const type = quantite > stockExistant.quantite ? "ENTREE" : "SORTIE";
+    const resultat = await stock.modifierQuantite(identifiant, quantite);
+    await stock.creerMouvement({
+      stockIdentifiant: identifiant,
+      utilisateurIdentifiant: req.utilisateur.identifiant,
+      type,
+      ancienneQuantite: stockExistant.quantite,
+      nouvelleQuantite: quantite,
+    });
+
+    if (quantite <= resultat.seuilAlerte) {
+      await notification.notifierEtablissement({
+        etablissementIdentifiant: resultat.etablissementIdentifiant,
+        type: "STOCK_FAIBLE",
+        titre: "Alerte de stock faible",
+        message: `Le stock n°${resultat.identifiant} est à ${quantite} unité(s).`,
+      });
+    }
+
     return res.json({
       ok: true,
       message: "Quantité du stock mise à jour.",
-      stock: await stock.modifierQuantite(identifiant, quantite),
+      stock: resultat,
     });
   } catch (erreur) {
     if (erreur.code === "P2025") {
@@ -130,4 +174,27 @@ async function modifierQuantite(req, res, next) {
   }
 }
 
-module.exports = { enregistrer, rechercher, modifierQuantite };
+// Consulte l'historique uniquement du stock autorisé au personnel connecté.
+async function historique(req, res, next) {
+  const identifiant = Number(req.params.identifiant);
+  const etablissementIdentifiant =
+    req.utilisateur.role === "ADMINISTRATEUR"
+      ? Number(req.query.etablissementIdentifiant)
+      : req.utilisateur.etablissementIdentifiant;
+
+  if (!Number.isInteger(identifiant) || !Number.isInteger(etablissementIdentifiant)) {
+    return res.status(400).json({
+      ok: false,
+      message: "L'identifiant du stock ou de l'établissement est invalide.",
+    });
+  }
+
+  try {
+    const mouvements = await stock.listerMouvements(identifiant, etablissementIdentifiant);
+    return res.json({ ok: true, nombre: mouvements.length, mouvements });
+  } catch (erreur) {
+    return next(erreur);
+  }
+}
+
+module.exports = { enregistrer, rechercher, modifierQuantite, historique };

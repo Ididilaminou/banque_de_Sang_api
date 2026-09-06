@@ -25,6 +25,7 @@ const gestionnaireStock = [
 // Le personnel de banque enregistre ou met à jour les stocks.
 routeur.post("/", ...gestionnaireStock, controleur.enregistrer);
 routeur.patch("/:identifiant/quantite", ...gestionnaireStock, controleur.modifierQuantite);
+routeur.get("/:identifiant/mouvements", ...personnelAutorise, controleur.historique);
 
 // Le personnel hospitalier peut consulter les stocks autorisés.
 routeur.get("/", ...personnelAutorise, controleur.rechercher);

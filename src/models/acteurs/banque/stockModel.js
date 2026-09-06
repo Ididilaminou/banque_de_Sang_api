@@ -22,6 +22,19 @@ const selectionStock = {
 };
 
 module.exports = {
+  // Recherche un stock et vérifie son établissement propriétaire.
+  trouverParIdentifiant(identifiant) {
+    return prisma.stock.findUnique({
+      where: { identifiant },
+      select: {
+        identifiant: true,
+        etablissementIdentifiant: true,
+        quantite: true,
+        seuilAlerte: true,
+      },
+    });
+  },
+
   // Retourne la quantité disponible pour une combinaison précise.
   trouverQuantite(etablissementIdentifiant, produit, groupeSanguin, rhesus) {
     return prisma.stock.findUnique({
@@ -72,6 +85,32 @@ module.exports = {
       where: { identifiant },
       data: { quantite },
       select: selectionStock,
+    });
+  },
+
+  // Enregistre une trace immuable de chaque opération sur le stock.
+  creerMouvement(donnees) {
+    return prisma.mouvementStock.create({ data: donnees });
+  },
+
+  // Retourne l'historique d'un stock.
+  listerMouvements(stockIdentifiant, etablissementIdentifiant) {
+    return prisma.mouvementStock.findMany({
+      where: {
+        stockIdentifiant,
+        stock: { etablissementIdentifiant },
+      },
+      select: {
+        identifiant: true,
+        stockIdentifiant: true,
+        utilisateurIdentifiant: true,
+        type: true,
+        ancienneQuantite: true,
+        nouvelleQuantite: true,
+        commentaire: true,
+        dateCreation: true,
+      },
+      orderBy: { dateCreation: "desc" },
     });
   },
 };

@@ -59,6 +59,7 @@ model Utilisateur {
   etablissement     Etablissement? @relation(fields: [etablissementIdentifiant], references: [identifiant])
   dossierPersonnel  DossierPersonnel?
   dossierAdministrateur DossierAdministrateur?
+  mouvementsStock    MouvementStock[]
 
   @@map("utilisateurs")
 }
@@ -302,10 +303,35 @@ model Stock {
   dateModification     DateTime            @updatedAt
 
   etablissement        Etablissement      @relation(fields: [etablissementIdentifiant], references: [identifiant], onDelete: Cascade)
+  mouvements           MouvementStock[]
 
   @@unique([etablissementIdentifiant, produit, groupeSanguin, rhesus])
   @@index([groupeSanguin, rhesus, produit])
   @@map("stocks")
+}
+
+enum TypeMouvementStock {
+  ENTREE
+  SORTIE
+  AJUSTEMENT
+}
+
+model MouvementStock {
+  identifiant          Int                @id @default(autoincrement())
+  stockIdentifiant     Int
+  utilisateurIdentifiant Int
+  type                 TypeMouvementStock
+  ancienneQuantite     Int
+  nouvelleQuantite     Int
+  commentaire          String?            @db.VarChar(500)
+  dateCreation         DateTime           @default(now())
+
+  stock                Stock              @relation(fields: [stockIdentifiant], references: [identifiant], onDelete: Cascade)
+  utilisateur          Utilisateur        @relation(fields: [utilisateurIdentifiant], references: [identifiant])
+
+  @@index([stockIdentifiant, dateCreation])
+  @@index([utilisateurIdentifiant, dateCreation])
+  @@map("mouvements_stocks")
 }
 
 model ActivationCompte {

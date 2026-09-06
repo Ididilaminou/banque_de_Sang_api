@@ -63,6 +63,29 @@ module.exports = {
     });
   },
 
+  // Alerte uniquement les personnels rattachés à l'établissement concerné.
+  async notifierEtablissement({ etablissementIdentifiant, type, titre, message }) {
+    const utilisateurs = await prisma.utilisateur.findMany({
+      where: {
+        etablissementIdentifiant,
+        role: { in: ["PERSONNEL_BANQUE", "PERSONNEL_HOPITAL"] },
+        estActif: true,
+      },
+      select: { identifiant: true },
+    });
+
+    if (utilisateurs.length === 0) return;
+
+    await prisma.notification.createMany({
+      data: utilisateurs.map((utilisateur) => ({
+        utilisateurIdentifiant: utilisateur.identifiant,
+        type,
+        titre,
+        message,
+      })),
+    });
+  },
+
   // Informe les banques qu'un donneur a répondu à une recommandation.
   notifierBanquesReponse({ demandeSangIdentifiant, statut }) {
     return this.notifierRoles({

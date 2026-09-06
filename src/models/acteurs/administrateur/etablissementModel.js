@@ -14,6 +14,18 @@ const selectionEtablissement = {
 };
 
 module.exports = {
+  // Vérifie que l'établissement correspond au rôle du personnel créé.
+  trouverPourRole(identifiant, role) {
+    return prisma.etablissement.findFirst({
+      where: {
+        identifiant,
+        statut: "AUTORISE",
+        type: role === "PERSONNEL_BANQUE" ? "BANQUE_SANG" : "HOPITAL",
+      },
+      select: { identifiant: true, nom: true, type: true },
+    });
+  },
+
   // Vérifie qu'un établissement est bien une banque autorisée.
   trouverBanqueAutorisee(identifiant) {
     return prisma.etablissement.findFirst({

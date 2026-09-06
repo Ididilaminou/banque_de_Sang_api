@@ -60,12 +60,13 @@ Les URLs existantes restent inchangées. Par exemple :
 - `POST /donneurs/:identifiant/verifier` permet à la banque de vérifier un donneur et de générer son code ;
 - `POST /authentification/activation` permet au donneur d'activer son compte avec ce code.
 - `POST /administrateurs/personnel` permet à un administrateur de créer un compte du personnel.
+- `PATCH /administrateurs/personnel/:identifiant/etablissement` permet de rattacher un ancien compte à un établissement.
 - `POST /installation/administrateur` permet de créer le premier administrateur.
 - `POST /dons` permet au personnel de banque d'enregistrer un don ;
 - `GET /dons/moi` permet au donneur de consulter son historique ;
 - `GET /dons/donneur/:identifiant` permet au personnel habilité de consulter un historique.
 - `POST /stocks` permet au personnel de banque d'enregistrer un stock ;
-- `GET /stocks` permet au personnel autorisé de consulter les stocks ;
+- `GET /stocks` permet au personnel autorisé de consulter les stocks de son établissement ;
 - `PATCH /stocks/:identifiant/quantite` permet de modifier une quantité.
 - `POST /demandes-sang` permet à un hôpital de créer une demande ;
 - `GET /demandes-sang` permet au personnel habilité de consulter les demandes ;
@@ -125,11 +126,15 @@ Authorization: Bearer JETON_ADMINISTRATEUR
   "prenom": "souley",
   "nom": "Personnel",
   "telephone": "+237600000000",
-  "role": "PERSONNEL_BANQUE"
+  "role": "PERSONNEL_BANQUE",
+  "etablissementIdentifiant": 1
 }
 ```
 
-Les rôles acceptés sont `PERSONNEL_BANQUE` et `PERSONNEL_HOPITAL`.
+Les rôles acceptés sont `PERSONNEL_BANQUE` et `PERSONNEL_HOPITAL`. L'établissement
+doit déjà être autorisé et compatible avec le rôle : banque pour le personnel de
+banque, hôpital pour le personnel hospitalier. Les routes utilisent ensuite
+automatiquement l'établissement lié au compte connecté.
 Les accès sont envoyés par Gmail SMTP. Le mot de passe temporaire n'est jamais
 retourné par l'API.
 

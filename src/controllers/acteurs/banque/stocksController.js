@@ -20,7 +20,11 @@ async function enregistrer(req, res, next) {
     seuilAlerte = 5,
   } = req.body;
 
-  const identifiantEtablissement = Number(etablissementIdentifiant);
+  // Pour un membre de banque, l'établissement vient du compte authentifié.
+  const identifiantEtablissement =
+    req.utilisateur.role === "ADMINISTRATEUR"
+      ? Number(etablissementIdentifiant)
+      : req.utilisateur.etablissementIdentifiant;
 
   if (
     !Number.isInteger(identifiantEtablissement) ||
@@ -67,7 +71,7 @@ async function enregistrer(req, res, next) {
 
 // Recherche les stocks avec des filtres optionnels.
 async function rechercher(req, res, next) {
-  const { etablissementIdentifiant, produit, groupeSanguin, rhesus } =
+  const { produit, groupeSanguin, rhesus } =
     req.query;
   const filtres = {
     etablissement: {
@@ -75,15 +79,8 @@ async function rechercher(req, res, next) {
     },
   };
 
-  if (etablissementIdentifiant !== undefined) {
-    const identifiant = Number(etablissementIdentifiant);
-    if (!Number.isInteger(identifiant)) {
-      return res.status(400).json({
-        ok: false,
-        message: "L'identifiant de l'établissement est invalide.",
-      });
-    }
-    filtres.etablissementIdentifiant = identifiant;
+  if (req.utilisateur.role === "PERSONNEL_BANQUE") {
+    filtres.etablissementIdentifiant = req.utilisateur.etablissementIdentifiant;
   }
   if (produit !== undefined && !produitsAutorises.has(produit)) {
     return res.status(400).json({ ok: false, message: "Le produit est invalide." });

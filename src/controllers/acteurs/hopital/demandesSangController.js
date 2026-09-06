@@ -32,9 +32,14 @@ async function creer(req, res, next) {
     urgence = false,
     motif,
   } = req.body;
+  // L'hôpital demandeur est celui lié au compte connecté.
+  const identifiantDemandeur =
+    req.utilisateur.role === "ADMINISTRATEUR"
+      ? Number(etablissementDemandeurId)
+      : req.utilisateur.etablissementIdentifiant;
 
   if (
-    !Number.isInteger(Number(etablissementDemandeurId)) ||
+    !Number.isInteger(identifiantDemandeur) ||
     !produitsAutorises.has(produit) ||
     !groupesAutorises.has(groupeSanguin) ||
     !rhesusAutorises.has(rhesus) ||
@@ -52,7 +57,7 @@ async function creer(req, res, next) {
 
   try {
     const resultat = await demandeSang.creer({
-      etablissementDemandeurId: Number(etablissementDemandeurId),
+      etablissementDemandeurId: identifiantDemandeur,
       produit,
       groupeSanguin,
       rhesus,
@@ -89,6 +94,11 @@ async function creer(req, res, next) {
 async function lister(req, res, next) {
   const { statut, urgence } = req.query;
   const filtres = {};
+
+  // Un hôpital ne consulte que les demandes qu'il a lui-même créées.
+  if (req.utilisateur.role === "PERSONNEL_HOPITAL") {
+    filtres.etablissementDemandeurId = req.utilisateur.etablissementIdentifiant;
+  }
 
   if (statut !== undefined) {
     if (!statutsAutorises.has(statut)) {
@@ -175,7 +185,11 @@ async function modifier(req, res, next) {
 // Recommande des donneurs compatibles lorsque le stock de la banque est insuffisant.
 async function recommanderDonneurs(req, res, next) {
   const identifiant = Number(req.params.identifiant);
-  const etablissementIdentifiant = Number(req.body.etablissementIdentifiant);
+  // La banque utilisatrice ne peut recommander qu'avec son propre stock.
+  const etablissementIdentifiant =
+    req.utilisateur.role === "ADMINISTRATEUR"
+      ? Number(req.body.etablissementIdentifiant)
+      : req.utilisateur.etablissementIdentifiant;
 
   if (!Number.isInteger(identifiant) || !Number.isInteger(etablissementIdentifiant)) {
     return res.status(400).json({

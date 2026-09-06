@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 
 const utilisateur = require("../../../models/acteurs/commun/utilisateurModel");
 const emailService = require("../../../services/emailService");
+const etablissement = require("../../../models/acteurs/administrateur/etablissementModel");
 
 const rolesPersonnel = new Set(["PERSONNEL_BANQUE", "PERSONNEL_HOPITAL"]);
 
@@ -12,13 +13,15 @@ function genererMotDePasseTemporaire() {
 }
 
 async function creerPersonnel(req, res, next) {
-  const { courriel, prenom, nom, telephone, role } = req.body;
+  const { courriel, prenom, nom, telephone, role, etablissementIdentifiant } = req.body;
+  const identifiantEtablissement = Number(etablissementIdentifiant);
 
   if (
     typeof courriel !== "string" ||
     typeof prenom !== "string" ||
     typeof nom !== "string" ||
-    typeof role !== "string"
+    typeof role !== "string" ||
+    !Number.isInteger(identifiantEtablissement)
   ) {
     return res.status(400).json({
       ok: false,
@@ -41,6 +44,17 @@ async function creerPersonnel(req, res, next) {
   }
 
   try {
+    const etablissementLie = await etablissement.trouverPourRole(
+      identifiantEtablissement,
+      role,
+    );
+    if (!etablissementLie) {
+      return res.status(400).json({
+        ok: false,
+        message: "L'établissement est introuvable, non autorisé ou incompatible avec le rôle.",
+      });
+    }
+
     if (await utilisateur.trouverParCourriel(courrielNormalise)) {
       return res.status(409).json({
         ok: false,
@@ -58,6 +72,7 @@ async function creerPersonnel(req, res, next) {
       role,
       estActif: true,
       doitChangerMotDePasse: true,
+      etablissementIdentifiant: identifiantEtablissement,
     });
 
     try {
@@ -90,4 +105,48 @@ async function creerPersonnel(req, res, next) {
   }
 }
 
-module.exports = { creerPersonnel };
+// Permet de rattacher un ancien compte du personnel à son établissement.
+async function rattacherEtablissement(req, res, next) {
+  const utilisateurIdentifiant = Number(req.params.identifiant);
+  const identifiantEtablissement = Number(req.body.etablissementIdentifiant);
+
+  if (!Number.isInteger(utilisateurIdentifiant) || !Number.isInteger(identifiantEtablissement)) {
+    return res.status(400).json({
+      ok: false,
+      message: "L'identifiant du personnel ou de l'établissement est invalide.",
+    });
+  }
+
+  try {
+    const compte = await utilisateur.trouverParIdentifiant(utilisateurIdentifiant, {
+      identifiant: true,
+      role: true,
+    });
+    if (!compte || !rolesPersonnel.has(compte.role)) {
+      return res.status(404).json({
+        ok: false,
+        message: "Compte du personnel introuvable.",
+      });
+    }
+
+    if (!await etablissement.trouverPourRole(identifiantEtablissement, compte.role)) {
+      return res.status(400).json({
+        ok: false,
+        message: "L'établissement est incompatible avec le rôle du personnel.",
+      });
+    }
+
+    const resultat = await utilisateur.modifier(utilisateurIdentifiant, {
+      etablissementIdentifiant: identifiantEtablissement,
+    });
+    return res.json({
+      ok: true,
+      message: "Compte du personnel rattaché à l'établissement.",
+      utilisateur: resultat,
+    });
+  } catch (erreur) {
+    return next(erreur);
+  }
+}
+
+module.exports = { creerPersonnel, rattacherEtablissement };

@@ -60,6 +60,7 @@ async function authentifierUtilisateur(req, res, next) {
         role: true,
         estActif: true,
         doitChangerMotDePasse: true,
+        etablissementIdentifiant: true,
       },
     });
 

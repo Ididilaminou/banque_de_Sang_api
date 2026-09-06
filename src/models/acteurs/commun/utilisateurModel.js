@@ -9,6 +9,7 @@ const selectionPublique = {
   role: true,
   estActif: true,
   doitChangerMotDePasse: true,
+  etablissementIdentifiant: true,
 };
 
 module.exports = {

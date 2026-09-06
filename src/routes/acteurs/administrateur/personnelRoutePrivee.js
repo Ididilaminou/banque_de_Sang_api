@@ -16,4 +16,13 @@ routeur.post(
   controleur.creerPersonnel,
 );
 
+// Rattache un compte ancien à un établissement autorisé.
+routeur.patch(
+  "/:identifiant/etablissement",
+  authentifierUtilisateur,
+  exigerMotDePasseDefinitif,
+  autoriserRoles("ADMINISTRATEUR"),
+  controleur.rattacherEtablissement,
+);
+
 module.exports = routeur;

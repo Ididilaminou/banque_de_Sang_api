@@ -49,12 +49,14 @@ model Utilisateur {
   role              Role     @default(DONNEUR)
   estActif          Boolean  @default(true)
   doitChangerMotDePasse Boolean @default(false)
+  etablissementIdentifiant Int?
   dateCreation      DateTime @default(now())
   dateModification  DateTime @updatedAt
 
   donneur           Donneur?
   activationCompte  ActivationCompte?
   notifications     Notification[]
+  etablissement     Etablissement? @relation(fields: [etablissementIdentifiant], references: [identifiant])
 
   @@map("utilisateurs")
 }
@@ -148,6 +150,7 @@ model Etablissement {
   stocks            Stock[]
   demandesEmises    DemandeSang[]       @relation("EtablissementDemandeur")
   demandesRecues    DemandeSang[]       @relation("EtablissementDestinataire")
+  utilisateurs      Utilisateur[]
 
   @@map("etablissements")
 }

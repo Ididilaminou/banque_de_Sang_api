@@ -2,6 +2,7 @@ const crypto = require("crypto");
 
 const utilisateur = require("../models/utilisateurModel");
 const activationCompte = require("../models/activationCompteModel");
+const emailService = require("../services/emailService");
 
 // Génère un code lisible avec un préfixe qui identifie une activation.
 function genererCodeActivation() {
@@ -33,6 +34,7 @@ async function verifierEtGenererCode(req, res, next) {
         courriel: true,
         role: true,
         estActif: true,
+        prenom: true,
       },
     );
 
@@ -64,10 +66,28 @@ async function verifierEtGenererCode(req, res, next) {
       dateExpiration,
     );
 
+    try {
+      // Le code est envoyé par email et ne sera pas exposé dans la réponse HTTP.
+      await emailService.envoyerCodeActivation({
+        courriel: donneur.courriel,
+        prenom: donneur.prenom,
+        codeActivation,
+        dateExpiration,
+      });
+    } catch (erreurEmail) {
+      // L'activation est supprimée pour éviter de garder un code jamais reçu.
+      const activation = await activationCompte.trouverParUtilisateur(
+        donneur.identifiant,
+      );
+      if (activation) {
+        await activationCompte.supprimer(activation.identifiant);
+      }
+      return next(erreurEmail);
+    }
+
     return res.json({
       ok: true,
-      message: "Donneur vérifié. Le code doit maintenant être transmis au donneur.",
-      codeActivation,
+      message: "Donneur vérifié. Le code d'activation a été envoyé par email.",
       dateExpiration,
       courriel: donneur.courriel,
     });

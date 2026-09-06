@@ -36,4 +36,11 @@ module.exports = {
       },
     });
   },
+
+  // Supprime une activation si l'envoi de l'email échoue.
+  supprimer(identifiant) {
+    return prisma.activationCompte.delete({
+      where: { identifiant },
+    });
+  },
 };

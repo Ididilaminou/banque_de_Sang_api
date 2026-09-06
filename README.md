@@ -62,9 +62,8 @@ POST /donneurs/:identifiant/verifier
 Authorization: Bearer JETON_DU_PERSONNEL
 ```
 
-Le système génère un code au format `AID-XXXXXX`, valable 24 heures. Pour le test local,
-le code est retourné dans la réponse. Il sera envoyé par email lorsque le service
-Gmail SMTP sera utilisé pour ce parcours.
+Le système génère un code au format `AID-XXXXXX`, valable 24 heures, puis
+l'envoie par Gmail SMTP. Le code n'est jamais retourné par l'API.
 
 Le donneur active ensuite son compte :
 

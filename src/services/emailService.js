@@ -44,4 +44,47 @@ async function envoyerAccesPersonnel({ courriel, prenom, motDePasseTemporaire })
   });
 }
 
-module.exports = { envoyerAccesPersonnel };
+// Envoie le code AID au donneur après vérification par la banque.
+async function envoyerCodeActivation({
+  courriel,
+  prenom,
+  codeActivation,
+  dateExpiration,
+}) {
+  if (
+    !env.smtpUtilisateur ||
+    !env.smtpMotDePasse ||
+    !env.adresseExpediteur
+  ) {
+    throw new Error(
+      "La configuration Gmail SMTP est incomplète. Remplissez les variables SMTP.",
+    );
+  }
+
+  const transporteur = nodemailer.createTransport({
+    host: env.smtpHost,
+    port: env.smtpPort,
+    secure: env.smtpPort === 465,
+    auth: {
+      user: env.smtpUtilisateur,
+      pass: env.smtpMotDePasse,
+    },
+  });
+
+  await transporteur.sendMail({
+    from: env.adresseExpediteur,
+    to: courriel,
+    subject: "Code d'activation de votre compte",
+    text: [
+      `Bonjour ${prenom},`,
+      "",
+      "Votre compte donneur a été vérifié par une banque de sang.",
+      `Votre code d'activation est : ${codeActivation}`,
+      `Ce code expire le : ${dateExpiration.toLocaleString("fr-FR")}`,
+      "",
+      "Ne communiquez pas ce code à une autre personne.",
+    ].join("\n"),
+  });
+}
+
+module.exports = { envoyerAccesPersonnel, envoyerCodeActivation };

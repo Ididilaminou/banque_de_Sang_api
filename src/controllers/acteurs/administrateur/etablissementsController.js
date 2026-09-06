@@ -4,14 +4,23 @@ const typesAutorises = new Set(["BANQUE_SANG", "HOPITAL"]);
 const statutsAutorises = new Set(["EN_ATTENTE", "AUTORISE", "SUSPENDU"]);
 
 async function creer(req, res, next) {
-  const { nom, type, adresse, ville, telephone, courriel } = req.body;
+  const {
+    nom,
+    type,
+    adresse,
+    ville,
+    telephone,
+    courriel,
+    possedeBanqueSangInterne = false,
+  } = req.body;
 
   if (
     typeof nom !== "string" ||
     typeof type !== "string" ||
     typeof adresse !== "string" ||
     typeof ville !== "string" ||
-    typeof courriel !== "string"
+    typeof courriel !== "string" ||
+    typeof possedeBanqueSangInterne !== "boolean"
   ) {
     return res.status(400).json({
       ok: false,
@@ -40,6 +49,8 @@ async function creer(req, res, next) {
       ville: ville.trim(),
       telephone: typeof telephone === "string" ? telephone.trim() || null : null,
       courriel: courriel.trim().toLowerCase(),
+      possedeBanqueSangInterne:
+        type === "HOPITAL" && possedeBanqueSangInterne,
     });
 
     return res.status(201).json({

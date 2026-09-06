@@ -21,7 +21,7 @@ const gestionnaireStock = [
   exigerMotDePasseDefinitif,
   exigerEtablissementPersonnel,
   exigerBanqueAutorisee,
-  autoriserRoles("PERSONNEL_BANQUE", "ADMINISTRATEUR"),
+  autoriserRoles("PERSONNEL_BANQUE", "PERSONNEL_HOPITAL", "ADMINISTRATEUR"),
 ];
 
 // Le personnel de banque enregistre ou met à jour les stocks.

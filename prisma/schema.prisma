@@ -151,6 +151,7 @@ model Etablissement {
   telephone         String?              @db.VarChar(30)
   courriel          String               @unique @db.VarChar(255)
   statut            StatutEtablissement @default(EN_ATTENTE)
+  possedeBanqueSangInterne Boolean      @default(false)
   dateCreation      DateTime             @default(now())
   dateModification  DateTime             @updatedAt
   stocks            Stock[]

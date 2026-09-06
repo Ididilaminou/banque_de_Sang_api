@@ -96,6 +96,11 @@ Les URLs existantes restent inchangées. Par exemple :
 - `POST /installation/administrateur` permet de créer le premier administrateur.
 - `POST /dons` permet au personnel de banque d'enregistrer un don ;
 - `GET /dons/moi` permet au donneur de consulter son historique ;
+
+Un hôpital peut également posséder une banque de sang interne. Dans ce cas,
+l'administrateur crée l'établissement avec `possedeBanqueSangInterne: true`.
+Après autorisation de l'établissement, son personnel hospitalier peut gérer ses
+propres stocks, tandis que les autres hôpitaux restent limités à la consultation.
 - `GET /dons/donneur/:identifiant` permet au personnel habilité de consulter un historique.
 - `POST /stocks` permet au personnel de banque d'enregistrer un stock ;
 - `GET /stocks` permet au personnel autorisé de consulter les stocks de son établissement ;

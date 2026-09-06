@@ -9,6 +9,7 @@ const selectionEtablissement = {
   telephone: true,
   courriel: true,
   statut: true,
+  possedeBanqueSangInterne: true,
   dateCreation: true,
   dateModification: true,
 };
@@ -33,6 +34,25 @@ module.exports = {
         identifiant,
         type: "BANQUE_SANG",
         statut: "AUTORISE",
+      },
+
+      trouverGestionnaireStockAutorise(identifiant) {
+        return prisma.etablissement.findFirst({
+          where: {
+            identifiant,
+            statut: "AUTORISE",
+            OR: [
+              { type: "BANQUE_SANG" },
+              { type: "HOPITAL", possedeBanqueSangInterne: true },
+            ],
+          },
+          select: {
+            identifiant: true,
+            nom: true,
+            type: true,
+            possedeBanqueSangInterne: true,
+          },
+        });
       },
       select: { identifiant: true, nom: true },
     });

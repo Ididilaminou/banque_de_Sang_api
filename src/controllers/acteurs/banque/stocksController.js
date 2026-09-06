@@ -48,14 +48,15 @@ async function enregistrer(req, res, next) {
 
   try {
     if (req.utilisateur.role === "ADMINISTRATEUR") {
-      const banque = await etablissement.trouverBanqueAutorisee(
+      const gestionnaire = await etablissement.trouverGestionnaireStockAutorise(
         identifiantEtablissement,
       );
 
-      if (!banque) {
+      if (!gestionnaire) {
         return res.status(403).json({
           ok: false,
-          message: "Le stock doit être rattaché à une banque de sang autorisée.",
+          message:
+            "Le stock doit être rattaché à une banque autorisée ou à un hôpital possédant une banque interne.",
         });
       }
     }
@@ -168,14 +169,15 @@ async function modifierQuantite(req, res, next) {
     }
 
     if (req.utilisateur.role === "ADMINISTRATEUR") {
-      const banque = await etablissement.trouverBanqueAutorisee(
+      const gestionnaire = await etablissement.trouverGestionnaireStockAutorise(
         stockExistant.etablissementIdentifiant,
       );
 
-      if (!banque) {
+      if (!gestionnaire) {
         return res.status(403).json({
           ok: false,
-          message: "Le stock doit appartenir à une banque de sang autorisée.",
+          message:
+            "Le stock doit appartenir à une structure autorisée à gérer un stock sanguin.",
         });
       }
     }

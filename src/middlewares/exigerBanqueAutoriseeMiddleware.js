@@ -1,20 +1,26 @@
 const etablissement = require("../models/acteurs/administrateur/etablissementModel");
 
-// Un compte banque ne peut manipuler que le stock de sa banque autorisée.
+// Seuls une banque autorisée ou un hôpital possédant sa banque interne
+// peuvent manipuler un stock sanguin.
 async function exigerBanqueAutorisee(req, res, next) {
-  if (req.utilisateur.role !== "PERSONNEL_BANQUE") {
+  if (
+    !["PERSONNEL_BANQUE", "PERSONNEL_HOPITAL"].includes(
+      req.utilisateur.role,
+    )
+  ) {
     return next();
   }
 
   try {
-    const banque = await etablissement.trouverBanqueAutorisee(
+    const gestionnaire = await etablissement.trouverGestionnaireStockAutorise(
       req.utilisateur.etablissementIdentifiant,
     );
 
-    if (!banque) {
+    if (!gestionnaire) {
       return res.status(403).json({
         ok: false,
-        message: "Ce compte n'est pas rattaché à une banque de sang autorisée.",
+        message:
+          "Cet établissement n'est pas autorisé à gérer un stock sanguin.",
       });
     }
 

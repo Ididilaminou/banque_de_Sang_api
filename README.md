@@ -18,6 +18,24 @@ npm run dev
 
 Puis ouvre : http://localhost:3000/health
 
+### Tests
+
+Les tests unitaires et les tests HTTP sans base de données se lancent avec :
+
+```bash
+npm test
+```
+
+Les tests d'intégration MySQL utilisent obligatoirement `DATABASE_URL_TEST`.
+Cette URL doit viser une base séparée, par exemple `banque_sang_test`, afin de
+ne jamais modifier les données de développement :
+
+```bash
+npm run test:integration
+```
+
+Si `DATABASE_URL_TEST` n'est pas définie, le test d'intégration est ignoré.
+
 ## Organisation du code
 
 ```text

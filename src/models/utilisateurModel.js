@@ -41,4 +41,11 @@ module.exports = {
       orderBy: { dateCreation: "desc" },
     });
   },
+
+  // Vérifie si la plateforme possède déjà un administrateur.
+  compterAdministrateurs() {
+    return prisma.utilisateur.count({
+      where: { role: "ADMINISTRATEUR" },
+    });
+  },
 };

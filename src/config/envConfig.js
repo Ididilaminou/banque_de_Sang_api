@@ -8,6 +8,8 @@ const env = {
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1d",
+  // Clé utilisée uniquement pour créer le tout premier administrateur.
+  cleInstallation: process.env.CLE_INSTALLATION,
   nodeEnv: process.env.NODE_ENV || "development",
 };
 

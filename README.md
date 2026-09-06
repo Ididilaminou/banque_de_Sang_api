@@ -50,6 +50,7 @@ Les URLs existantes restent inchangées. Par exemple :
 - `POST /donneurs/:identifiant/verifier` permet à la banque de vérifier un donneur et de générer son code ;
 - `POST /authentification/activation` permet au donneur d'activer son compte avec ce code.
 - `POST /administrateurs/personnel` permet à un administrateur de créer un compte du personnel.
+- `POST /installation/administrateur` permet de créer le premier administrateur.
 
 ### Activation d'un donneur
 
@@ -108,6 +109,28 @@ Les routes métier sont bloquées jusqu'à l'appel suivant :
 PUT /authentification/mot-de-passe
 Authorization: Bearer JETON_TEMPORAIRE
 ```
+
+### Création du premier administrateur
+
+Ajoute d'abord une valeur secrète `CLE_INSTALLATION` dans `.env`, puis utilise :
+
+```http
+POST /installation/administrateur
+X-Cle-Installation: ta-cle-secrete
+Content-Type: application/json
+```
+
+```json
+{
+  "courriel": "admin@example.com",
+  "motDePasse": "AdminMotDePasse123!",
+  "prenom": "Admin",
+  "nom": "Principal",
+  "telephone": "+237600000000"
+}
+```
+
+Cette route refuse toute nouvelle création dès qu'un administrateur existe.
 
 ```json
 {

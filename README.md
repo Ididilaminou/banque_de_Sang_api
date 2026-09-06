@@ -36,6 +36,20 @@ npm run test:integration
 
 Si `DATABASE_URL_TEST` n'est pas définie, le test d'intégration est ignoré.
 
+### Configuration de production
+
+Avec `NODE_ENV=production`, l'API refuse de démarrer si les variables
+obligatoires sont absentes ou utilisent des valeurs d'exemple :
+
+- `DATABASE_URL` ;
+- `JWT_SECRET` d'au moins 32 caractères ;
+- `CLE_INSTALLATION` ;
+- les variables SMTP ;
+- `OPENAI_API_KEY` ;
+- `URL_APPLICATION` valide.
+
+En développement, les services externes sont vérifiés lorsqu'ils sont utilisés.
+
 ## Organisation du code
 
 ```text

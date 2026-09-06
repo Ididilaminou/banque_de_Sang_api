@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "test": "node --test test/application.test.js test/authentification.test.js test/demandes-sang.test.js test/middlewares.test.js test/regles-metier.test.js",
+    "test": "node --test test/application.test.js test/authentification.test.js test/configuration.test.js test/demandes-sang.test.js test/middlewares.test.js test/regles-metier.test.js",
     "test:integration": "node --test test/integration.test.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"

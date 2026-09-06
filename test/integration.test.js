@@ -99,6 +99,8 @@ describe("Base MySQL d'intégration", () => {
     let banque;
     let hopital;
     let utilisateur;
+    let stock;
+    let demande;
 
     try {
       banque = await prisma.etablissement.create({
@@ -135,7 +137,7 @@ describe("Base MySQL d'intégration", () => {
         },
       });
 
-      const stock = await prisma.stock.create({
+      stock = await prisma.stock.create({
         data: {
           etablissementIdentifiant: banque.identifiant,
           produit: "SANG_TOTAL",
@@ -156,7 +158,7 @@ describe("Base MySQL d'intégration", () => {
         },
       });
 
-      const demande = await prisma.demandeSang.create({
+      demande = await prisma.demandeSang.create({
         data: {
           etablissementDemandeurId: hopital.identifiant,
           produit: "SANG_TOTAL",
@@ -201,7 +203,28 @@ describe("Base MySQL d'intégration", () => {
       assert.equal(audits, 1);
       assert.equal(demandeFinale.statut, "EN_COURS");
     } finally {
-      if (utilisateur) await prisma.utilisateur.delete({ where: { identifiant: utilisateur.identifiant } });
+      if (demande) {
+        await prisma.journalAudit.deleteMany({
+          where: { ressourceIdentifiant: demande.identifiant },
+        });
+        await prisma.historiqueDemandeSang.deleteMany({
+          where: { demandeSangIdentifiant: demande.identifiant },
+        });
+        await prisma.demandeSang.delete({
+          where: { identifiant: demande.identifiant },
+        });
+      }
+      if (stock) {
+        await prisma.mouvementStock.deleteMany({
+          where: { stockIdentifiant: stock.identifiant },
+        });
+        await prisma.stock.delete({ where: { identifiant: stock.identifiant } });
+      }
+      if (utilisateur) {
+        await prisma.utilisateur.delete({
+          where: { identifiant: utilisateur.identifiant },
+        });
+      }
       if (banque) await prisma.etablissement.delete({ where: { identifiant: banque.identifiant } });
       if (hopital) await prisma.etablissement.delete({ where: { identifiant: hopital.identifiant } });
       await prisma.$disconnect();

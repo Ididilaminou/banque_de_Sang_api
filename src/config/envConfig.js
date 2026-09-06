@@ -22,4 +22,59 @@ const env = {
   openaiModel: process.env.OPENAI_MODEL || "gpt-4o-mini",
 };
 
+function estValeurPlaceholder(valeur) {
+  if (!valeur) return true;
+
+  const valeurNormalisee = valeur.toLowerCase();
+  return [
+    "change-moi",
+    "remplacer",
+    "ta-cle",
+    "mot-de-passe",
+    "ma-cle-secrete",
+  ].some((placeholder) => valeurNormalisee.includes(placeholder));
+}
+
+function validerConfiguration({ stricte = env.nodeEnv === "production" } = {}) {
+  const erreurs = [];
+
+  if (!env.databaseUrl) erreurs.push("DATABASE_URL");
+  if (!env.jwtSecret || (stricte && (env.jwtSecret.length < 32 || estValeurPlaceholder(env.jwtSecret)))) {
+    erreurs.push("JWT_SECRET");
+  }
+  if (!env.cleInstallation || (stricte && estValeurPlaceholder(env.cleInstallation))) {
+    erreurs.push("CLE_INSTALLATION");
+  }
+
+  try {
+    if (env.databaseUrl) new URL(env.databaseUrl);
+  } catch (_erreur) {
+    erreurs.push("DATABASE_URL_FORMAT");
+  }
+
+  if (!Number.isInteger(env.port) || env.port < 1 || env.port > 65535) {
+    erreurs.push("PORT");
+  }
+
+  if (stricte) {
+    if (!env.smtpUtilisateur || !env.smtpMotDePasse || !env.adresseExpediteur) {
+      erreurs.push("SMTP");
+    }
+    if (!env.openaiApiKey || estValeurPlaceholder(env.openaiApiKey)) {
+      erreurs.push("OPENAI_API_KEY");
+    }
+    try {
+      new URL(env.urlApplication);
+    } catch (_erreur) {
+      erreurs.push("URL_APPLICATION");
+    }
+  }
+
+  if (erreurs.length > 0) {
+    throw new Error(`Configuration invalide : ${erreurs.join(", ")}.`);
+  }
+}
+
+env.validerConfiguration = validerConfiguration;
+
 module.exports = env;

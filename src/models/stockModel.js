@@ -22,6 +22,21 @@ const selectionStock = {
 };
 
 module.exports = {
+  // Retourne la quantité disponible pour une combinaison précise.
+  trouverQuantite(etablissementIdentifiant, produit, groupeSanguin, rhesus) {
+    return prisma.stock.findUnique({
+      where: {
+        etablissementIdentifiant_produit_groupeSanguin_rhesus: {
+          etablissementIdentifiant,
+          produit,
+          groupeSanguin,
+          rhesus,
+        },
+      },
+      select: { quantite: true },
+    });
+  },
+
   // Crée ou met à jour une ligne de stock unique.
   enregistrer(donnees) {
     return prisma.stock.upsert({

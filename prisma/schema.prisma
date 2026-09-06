@@ -48,6 +48,7 @@ model Utilisateur {
   telephone         String?  @db.VarChar(30)
   role              Role     @default(DONNEUR)
   estActif          Boolean  @default(true)
+  doitChangerMotDePasse Boolean @default(false)
   dateCreation      DateTime @default(now())
   dateModification  DateTime @updatedAt
 

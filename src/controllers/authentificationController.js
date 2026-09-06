@@ -15,6 +15,7 @@ function reponseUtilisateur(utilisateurConnecte) {
     telephone: utilisateurConnecte.telephone,
     role: utilisateurConnecte.role,
     estActif: utilisateurConnecte.estActif,
+    doitChangerMotDePasse: utilisateurConnecte.doitChangerMotDePasse,
   };
 }
 
@@ -167,6 +168,7 @@ async function modifierMotDePasse(req, res, next) {
     }
     await utilisateur.modifier(req.utilisateur.identifiant, {
       motDePasseHash: await bcrypt.hash(nouveauMotDePasse, 12),
+      doitChangerMotDePasse: false,
     });
     return res.json({ ok: true, message: "Mot de passe modifié avec succès." });
   } catch (erreur) {

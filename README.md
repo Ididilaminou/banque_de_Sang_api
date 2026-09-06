@@ -101,6 +101,21 @@ Les rôles acceptés sont `PERSONNEL_BANQUE` et `PERSONNEL_HOPITAL`.
 Le mot de passe est temporairement retourné dans la réponse pour les tests
 locaux. Il sera envoyé par email après l'intégration de Gmail SMTP.
 
+Lors de sa première connexion, le personnel reçoit `doitChangerMotDePasse: true`.
+Les routes métier sont bloquées jusqu'à l'appel suivant :
+
+```http
+PUT /authentification/mot-de-passe
+Authorization: Bearer JETON_TEMPORAIRE
+```
+
+```json
+{
+  "ancienMotDePasse": "MOT_DE_PASSE_TEMPORAIRE",
+  "nouveauMotDePasse": "NouveauMotDePasse123!"
+}
+```
+
 ## Scripts
 
 | Commande | Rôle |

@@ -59,6 +59,7 @@ async function authentifierUtilisateur(req, res, next) {
         telephone: true,
         role: true,
         estActif: true,
+        doitChangerMotDePasse: true,
       },
     });
 

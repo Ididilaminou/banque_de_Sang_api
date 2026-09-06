@@ -56,6 +56,7 @@ async function creerPersonnel(req, res, next) {
       telephone: typeof telephone === "string" ? telephone.trim() || null : null,
       role,
       estActif: true,
+      doitChangerMotDePasse: true,
     });
 
     return res.status(201).json({

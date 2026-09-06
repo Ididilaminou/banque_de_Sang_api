@@ -8,6 +8,7 @@ const selectionPublique = {
   telephone: true,
   role: true,
   estActif: true,
+  doitChangerMotDePasse: true,
 };
 
 module.exports = {

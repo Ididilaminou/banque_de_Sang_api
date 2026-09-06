@@ -4,6 +4,7 @@ const controleur = require("../../../controllers/acteurs/banque/activationDonneu
 const authentifierUtilisateur = require("../../../middlewares/authentificationMiddleware");
 const autoriserRoles = require("../../../middlewares/autorisationMiddleware");
 const exigerMotDePasseDefinitif = require("../../../middlewares/motDePasseDefinitifMiddleware");
+const exigerEtablissementPersonnel = require("../../../middlewares/exigerEtablissementPersonnelMiddleware");
 
 const routeur = express.Router();
 
@@ -12,6 +13,7 @@ routeur.post(
   "/:identifiant/verifier",
   authentifierUtilisateur,
   exigerMotDePasseDefinitif,
+  exigerEtablissementPersonnel,
   autoriserRoles("PERSONNEL_BANQUE", "ADMINISTRATEUR"),
   controleur.verifierEtGenererCode,
 );

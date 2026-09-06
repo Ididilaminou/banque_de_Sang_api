@@ -4,24 +4,28 @@ const controleur = require("../../../controllers/acteurs/hopital/demandesSangCon
 const authentifierUtilisateur = require("../../../middlewares/authentificationMiddleware");
 const autoriserRoles = require("../../../middlewares/autorisationMiddleware");
 const exigerMotDePasseDefinitif = require("../../../middlewares/motDePasseDefinitifMiddleware");
+const exigerEtablissementPersonnel = require("../../../middlewares/exigerEtablissementPersonnelMiddleware");
 
 const routeur = express.Router();
 
 const hopital = [
   authentifierUtilisateur,
   exigerMotDePasseDefinitif,
+  exigerEtablissementPersonnel,
   autoriserRoles("PERSONNEL_HOPITAL", "ADMINISTRATEUR"),
 ];
 
 const personnelHabilite = [
   authentifierUtilisateur,
   exigerMotDePasseDefinitif,
+  exigerEtablissementPersonnel,
   autoriserRoles("PERSONNEL_BANQUE", "PERSONNEL_HOPITAL", "ADMINISTRATEUR"),
 ];
 
 const gestionnaire = [
   authentifierUtilisateur,
   exigerMotDePasseDefinitif,
+  exigerEtablissementPersonnel,
   autoriserRoles("PERSONNEL_BANQUE", "ADMINISTRATEUR"),
 ];
 

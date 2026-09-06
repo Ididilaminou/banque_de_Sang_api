@@ -48,6 +48,24 @@ const routeIntrouvable = (req, res) => {
   });
 };
 
+// Transforme les erreurs en réponses JSON cohérentes pour Postman et le frontend.
+// En production, le détail technique n'est jamais exposé au client.
+const gestionnaireErreurs = (erreur, _req, res, _next) => {
+  console.error(erreur);
+
+  if (erreur instanceof SyntaxError && erreur.status === 400 && erreur.body) {
+    return res.status(400).json({
+      ok: false,
+      message: "Le corps JSON de la requête est invalide.",
+    });
+  }
+
+  return res.status(500).json({
+    ok: false,
+    message: "Une erreur interne est survenue.",
+  });
+};
+
 // Route racine : http://localhost:PORT/
 app.get("/", acceuil);
 
@@ -74,6 +92,9 @@ app.use("/audit", routeurAuditPrivee);
 
 // À placer en dernier pour intercepter les routes manquantes
 app.use(routeIntrouvable);
+
+// Doit rester après toutes les routes pour intercepter leurs erreurs.
+app.use(gestionnaireErreurs);
 
 // Export de l'application pour qu'elle soit utilisée par le serveur
 module.exports = app;

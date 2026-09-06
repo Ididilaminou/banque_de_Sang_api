@@ -128,6 +128,23 @@ Cette capacité peut aussi être modifiée avec
 - `GET /demandes-sang/:identifiant/historique` permet de consulter les changements de statut et leur auteur.
 - `GET /audit` permet à l'administrateur de consulter le journal des opérations.
 
+### Rôles et périmètres
+
+| Rôle | Périmètre principal |
+| --- | --- |
+| `DONNEUR` | Profil, activation, dons, notifications et test d'éligibilité |
+| `PERSONNEL_BANQUE` | Stocks de sa banque, dons, demandes et recommandations |
+| `PERSONNEL_HOPITAL` | Demandes de son hôpital et consultation des stocks |
+| `ADMINISTRATEUR` | Établissements, personnels, audit et supervision globale |
+
+Un personnel ne choisit jamais librement un autre établissement dans les routes
+métier : l'établissement est déduit de son compte authentifié. Plusieurs comptes
+peuvent être rattachés au même établissement.
+
+Un `PERSONNEL_HOPITAL` peut gérer les stocks uniquement si son hôpital est autorisé
+et possède `possedeBanqueSangInterne: true`. Un hôpital sans banque interne peut
+consulter les stocks disponibles mais ne peut pas les modifier.
+
 Les notifications de changement de demande sont ciblées sur l'établissement
 concerné. Elles ne sont pas envoyées à tous les hôpitaux.
 

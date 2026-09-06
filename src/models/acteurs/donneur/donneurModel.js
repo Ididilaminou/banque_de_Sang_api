@@ -51,26 +51,32 @@ module.exports = {
     });
   },
 
-  rechercher(filtres) {
-    return prisma.donneur.findMany({
-      where: filtres,
-      select: {
-        identifiant: true,
-        groupeSanguin: true,
-        rhesus: true,
-        estDisponible: true,
-        dateDerniereDisponibilite: true,
-        utilisateur: {
-          select: {
-            identifiant: true,
-            prenom: true,
-            nom: true,
-            telephone: true,
+  async rechercher(filtres, pagination) {
+    const [donneurs, total] = await prisma.$transaction([
+      prisma.donneur.findMany({
+        where: filtres,
+        select: {
+          identifiant: true,
+          groupeSanguin: true,
+          rhesus: true,
+          estDisponible: true,
+          dateDerniereDisponibilite: true,
+          utilisateur: {
+            select: {
+              identifiant: true,
+              prenom: true,
+              nom: true,
+              telephone: true,
+            },
           },
         },
-      },
-      orderBy: { dateModification: "desc" },
-    });
+        orderBy: { dateModification: "desc" },
+        skip: pagination.saut,
+        take: pagination.limite,
+      }),
+      prisma.donneur.count({ where: filtres }),
+    ]);
+    return { donneurs, total };
   },
 
   // Recherche uniquement les donneurs actifs et compatibles avec une demande.

@@ -30,12 +30,18 @@ module.exports = {
     });
   },
 
-  lister(filtres) {
-    return prisma.demandeSang.findMany({
-      where: filtres,
-      select: selectionDemande,
-      orderBy: [{ urgence: "desc" }, { dateCreation: "desc" }],
-    });
+  async lister(filtres, pagination) {
+    const [demandes, total] = await prisma.$transaction([
+      prisma.demandeSang.findMany({
+        where: filtres,
+        select: selectionDemande,
+        orderBy: [{ urgence: "desc" }, { dateCreation: "desc" }],
+        skip: pagination.saut,
+        take: pagination.limite,
+      }),
+      prisma.demandeSang.count({ where: filtres }),
+    ]);
+    return { demandes, total };
   },
 
   trouverParIdentifiant(identifiant) {

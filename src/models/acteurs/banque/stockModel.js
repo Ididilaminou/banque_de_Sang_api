@@ -71,12 +71,18 @@ module.exports = {
   },
 
   // Retourne les stocks qui correspondent aux filtres fournis.
-  rechercher(filtres) {
-    return prisma.stock.findMany({
-      where: filtres,
-      select: selectionStock,
-      orderBy: { dateModification: "desc" },
-    });
+  async rechercher(filtres, pagination) {
+    const [stocks, total] = await prisma.$transaction([
+      prisma.stock.findMany({
+        where: filtres,
+        select: selectionStock,
+        orderBy: { dateModification: "desc" },
+        skip: pagination.saut,
+        take: pagination.limite,
+      }),
+      prisma.stock.count({ where: filtres }),
+    ]);
+    return { stocks, total };
   },
 
   // Modifie seulement la quantité d'un stock existant.

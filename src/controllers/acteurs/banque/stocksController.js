@@ -1,5 +1,6 @@
 const stock = require("../../../models/acteurs/banque/stockModel");
 const notification = require("../../../models/acteurs/commun/notificationModel");
+const { lirePagination } = require("../../../utils/pagination");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -94,6 +95,8 @@ async function rechercher(req, res, next) {
       statut: "AUTORISE",
     },
   };
+  const pagination = lirePagination(req.query);
+  if (!pagination) return res.status(400).json({ ok: false, message: "La pagination est invalide. Utilisez page >= 1 et limite entre 1 et 100." });
 
   if (req.utilisateur.role === "PERSONNEL_BANQUE") {
     filtres.etablissementIdentifiant = req.utilisateur.etablissementIdentifiant;
@@ -113,8 +116,8 @@ async function rechercher(req, res, next) {
   if (rhesus !== undefined) filtres.rhesus = rhesus;
 
   try {
-    const resultats = await stock.rechercher(filtres);
-    return res.json({ ok: true, nombre: resultats.length, stocks: resultats });
+    const resultats = await stock.rechercher(filtres, pagination);
+    return res.json({ ok: true, nombre: resultats.stocks.length, total: resultats.total, page: pagination.page, limite: pagination.limite, stocks: resultats.stocks });
   } catch (erreur) {
     return next(erreur);
   }

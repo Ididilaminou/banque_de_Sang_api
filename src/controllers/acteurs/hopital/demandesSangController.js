@@ -3,6 +3,7 @@ const notification = require("../../../models/acteurs/commun/notificationModel")
 const stock = require("../../../models/acteurs/banque/stockModel");
 const donneur = require("../../../models/acteurs/donneur/donneurModel");
 const etablissement = require("../../../models/acteurs/administrateur/etablissementModel");
+const { lirePagination } = require("../../../utils/pagination");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",
@@ -103,6 +104,8 @@ async function creer(req, res, next) {
 async function lister(req, res, next) {
   const { statut, urgence } = req.query;
   const filtres = {};
+  const pagination = lirePagination(req.query);
+  if (!pagination) return res.status(400).json({ ok: false, message: "La pagination est invalide. Utilisez page >= 1 et limite entre 1 et 100." });
 
   // Un hôpital ne consulte que les demandes qu'il a lui-même créées.
   if (req.utilisateur.role === "PERSONNEL_HOPITAL") {
@@ -130,11 +133,14 @@ async function lister(req, res, next) {
   }
 
   try {
-    const resultats = await demandeSang.lister(filtres);
+    const resultats = await demandeSang.lister(filtres, pagination);
     return res.json({
       ok: true,
-      nombre: resultats.length,
-      demandes: resultats,
+      nombre: resultats.demandes.length,
+      total: resultats.total,
+      page: pagination.page,
+      limite: pagination.limite,
+      demandes: resultats.demandes,
     });
   } catch (erreur) {
     return next(erreur);

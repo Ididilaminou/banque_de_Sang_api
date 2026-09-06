@@ -13,15 +13,22 @@ const selectionNotification = {
 
 module.exports = {
   // Retourne uniquement les notifications de l'utilisateur connecté.
-  listerPourUtilisateur(utilisateurIdentifiant, seulementNonLues = false) {
-    return prisma.notification.findMany({
-      where: {
-        utilisateurIdentifiant,
-        ...(seulementNonLues ? { estLue: false } : {}),
-      },
-      select: selectionNotification,
-      orderBy: { dateCreation: "desc" },
-    });
+  async listerPourUtilisateur(utilisateurIdentifiant, seulementNonLues = false, pagination) {
+    const where = {
+      utilisateurIdentifiant,
+      ...(seulementNonLues ? { estLue: false } : {}),
+    };
+    const [notifications, total] = await prisma.$transaction([
+      prisma.notification.findMany({
+        where,
+        select: selectionNotification,
+        orderBy: { dateCreation: "desc" },
+        skip: pagination.saut,
+        take: pagination.limite,
+      }),
+      prisma.notification.count({ where }),
+    ]);
+    return { notifications, total };
   },
 
   // Crée une notification pour tous les comptes actifs ayant les rôles ciblés.

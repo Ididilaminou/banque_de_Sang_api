@@ -87,6 +87,9 @@ Les URLs existantes restent inchangées. Par exemple :
 - `GET /demandes-sang` permet au personnel habilité de consulter les demandes ;
 - `PATCH /demandes-sang/:identifiant` permet à la banque de traiter une demande.
 - `GET /demandes-sang/:identifiant/historique` permet de consulter les changements de statut et leur auteur.
+
+Les listes acceptent `page` et `limite` (de 1 à 100), par exemple :
+`GET /demandes-sang?page=1&limite=20`.
 - `POST /demandes-sang/:identifiant/recommander-donneurs` permet à une banque de notifier les donneurs compatibles lorsque son stock est insuffisant.
 - `POST /demandes-sang/:identifiant/reponse-donneur` permet au donneur d'accepter ou de refuser la recommandation.
 - `GET /notifications` permet de consulter ses notifications ;

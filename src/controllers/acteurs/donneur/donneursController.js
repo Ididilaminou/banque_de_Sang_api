@@ -1,4 +1,5 @@
 const donneur = require("../../../models/acteurs/donneur/donneurModel");
+const { lirePagination } = require("../../../utils/pagination");
 
 const groupesSanguins = new Set(["A", "B", "AB", "O"]);
 const rhesusAutorises = new Set(["POSITIF", "NEGATIF"]);
@@ -6,6 +7,8 @@ const rhesusAutorises = new Set(["POSITIF", "NEGATIF"]);
 async function rechercher(req, res, next) {
   const { groupeSanguin, rhesus, disponible } = req.query;
   const filtres = {};
+  const pagination = lirePagination(req.query);
+  if (!pagination) return res.status(400).json({ ok: false, message: "La pagination est invalide. Utilisez page >= 1 et limite entre 1 et 100." });
   if (groupeSanguin !== undefined) {
     if (!groupesSanguins.has(groupeSanguin)) return res.status(400).json({ ok: false, message: "Le groupe sanguin est invalide." });
     filtres.groupeSanguin = groupeSanguin;
@@ -19,8 +22,8 @@ async function rechercher(req, res, next) {
     filtres.estDisponible = disponible === "true";
   }
   try {
-    const resultats = await donneur.rechercher(filtres);
-    return res.json({ ok: true, nombre: resultats.length, donneurs: resultats });
+    const resultats = await donneur.rechercher(filtres, pagination);
+    return res.json({ ok: true, nombre: resultats.donneurs.length, total: resultats.total, page: pagination.page, limite: pagination.limite, donneurs: resultats.donneurs });
   } catch (erreur) {
     return next(erreur);
   }

@@ -23,8 +23,10 @@ Puis ouvre : http://localhost:3000/health
 ```text
 src/
 ├── config/          # envConfig.js, prismaConfig.js
-├── models/          # utilisateurModel.js, donneurModel.js
-├── controllers/     # *Controller.js
+├── models/          # modèles rangés par acteur
+│   └── acteurs/
+├── controllers/     # contrôleurs rangés par acteur
+│   └── acteurs/
 ├── middlewares/     # *Middleware.js
 └── routes/
     └── acteurs/
@@ -120,7 +122,7 @@ Authorization: Bearer JETON_ADMINISTRATEUR
 ```json
 {
   "courriel": "personnel@example.com",
-  "prenom": "Jean",
+  "prenom": "souley",
   "nom": "Personnel",
   "telephone": "+237600000000",
   "role": "PERSONNEL_BANQUE"

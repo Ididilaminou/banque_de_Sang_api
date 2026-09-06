@@ -1,8 +1,8 @@
-const demandeSang = require("../models/demandeSangModel");
-const notification = require("../models/notificationModel");
-const stock = require("../models/stockModel");
-const donneur = require("../models/donneurModel");
-const etablissement = require("../models/etablissementModel");
+const demandeSang = require("../../../models/acteurs/hopital/demandeSangModel");
+const notification = require("../../../models/acteurs/commun/notificationModel");
+const stock = require("../../../models/acteurs/banque/stockModel");
+const donneur = require("../../../models/acteurs/donneur/donneurModel");
+const etablissement = require("../../../models/acteurs/administrateur/etablissementModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",

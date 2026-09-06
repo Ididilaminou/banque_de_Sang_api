@@ -1,6 +1,6 @@
 const express = require("express");
 
-const controleur = require("../../../controllers/demandesSangController");
+const controleur = require("../../../controllers/acteurs/hopital/demandesSangController");
 const authentifierUtilisateur = require("../../../middlewares/authentificationMiddleware");
 const autoriserRoles = require("../../../middlewares/autorisationMiddleware");
 const exigerMotDePasseDefinitif = require("../../../middlewares/motDePasseDefinitifMiddleware");

@@ -1,4 +1,4 @@
-const prisma = require("../config/prismaConfig");
+const prisma = require("../../../config/prismaConfig");
 
 // Champs autorisés dans les réponses pour ne jamais exposer de données inutiles.
 const selectionDon = {

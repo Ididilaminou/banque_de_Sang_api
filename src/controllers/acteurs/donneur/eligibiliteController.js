@@ -1,6 +1,6 @@
-const donneur = require("../models/donneurModel");
-const eligibilite = require("../models/eligibiliteModel");
-const eligibiliteIa = require("../services/eligibiliteIaService");
+const donneur = require("../../../models/acteurs/donneur/donneurModel");
+const eligibilite = require("../../../models/acteurs/donneur/eligibiliteModel");
+const eligibiliteIa = require("../../../services/eligibiliteIaService");
 
 const reponsesBooleennes = [
   "fievreRecente",

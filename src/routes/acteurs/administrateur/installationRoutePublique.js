@@ -1,6 +1,6 @@
 const express = require("express");
 
-const controleur = require("../../../controllers/installationController");
+const controleur = require("../../../controllers/acteurs/administrateur/installationController");
 
 const routeur = express.Router();
 

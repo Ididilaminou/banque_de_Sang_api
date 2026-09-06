@@ -1,8 +1,8 @@
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
-const utilisateur = require("../models/utilisateurModel");
-const emailService = require("../services/emailService");
+const utilisateur = require("../../../models/acteurs/commun/utilisateurModel");
+const emailService = require("../../../services/emailService");
 
 const rolesPersonnel = new Set(["PERSONNEL_BANQUE", "PERSONNEL_HOPITAL"]);
 

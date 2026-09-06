@@ -1,8 +1,8 @@
 const crypto = require("crypto");
 
-const utilisateur = require("../models/utilisateurModel");
-const activationCompte = require("../models/activationCompteModel");
-const emailService = require("../services/emailService");
+const utilisateur = require("../../../models/acteurs/commun/utilisateurModel");
+const activationCompte = require("../../../models/acteurs/commun/activationCompteModel");
+const emailService = require("../../../services/emailService");
 
 // Génère un code lisible avec un préfixe qui identifie une activation.
 function genererCodeActivation() {

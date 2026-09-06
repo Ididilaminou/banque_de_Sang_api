@@ -1,6 +1,6 @@
 const express = require("express");
 
-const controleur = require("../../../controllers/notificationsController");
+const controleur = require("../../../controllers/acteurs/commun/notificationsController");
 const authentifierUtilisateur = require("../../../middlewares/authentificationMiddleware");
 const exigerMotDePasseDefinitif = require("../../../middlewares/motDePasseDefinitifMiddleware");
 

@@ -1,4 +1,4 @@
-const etablissement = require("../models/etablissementModel");
+const etablissement = require("../../../models/acteurs/administrateur/etablissementModel");
 
 const typesAutorises = new Set(["BANQUE_SANG", "HOPITAL"]);
 const statutsAutorises = new Set(["EN_ATTENTE", "AUTORISE", "SUSPENDU"]);

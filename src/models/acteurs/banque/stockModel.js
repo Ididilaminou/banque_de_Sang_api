@@ -1,4 +1,4 @@
-const prisma = require("../config/prismaConfig");
+const prisma = require("../../../config/prismaConfig");
 
 // Cette sélection limite les champs renvoyés par l'API.
 const selectionStock = {

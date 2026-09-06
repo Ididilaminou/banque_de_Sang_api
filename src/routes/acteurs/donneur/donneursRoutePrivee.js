@@ -1,5 +1,5 @@
 const express = require("express");
-const controleur = require("../../../controllers/donneursController");
+const controleur = require("../../../controllers/acteurs/donneur/donneursController");
 const authentifierUtilisateur = require("../../../middlewares/authentificationMiddleware");
 const autoriserRoles = require("../../../middlewares/autorisationMiddleware");
 const exigerMotDePasseDefinitif = require("../../../middlewares/motDePasseDefinitifMiddleware");

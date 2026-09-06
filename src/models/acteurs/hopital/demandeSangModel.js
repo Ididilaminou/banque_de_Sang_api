@@ -1,4 +1,4 @@
-const prisma = require("../config/prismaConfig");
+const prisma = require("../../../config/prismaConfig");
 
 // Cette sélection définit les informations visibles dans les réponses API.
 const selectionDemande = {

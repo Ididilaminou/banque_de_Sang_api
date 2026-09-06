@@ -2,9 +2,9 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
-const utilisateur = require("../models/utilisateurModel");
-const activationCompte = require("../models/activationCompteModel");
-const env = require("../config/envConfig");
+const utilisateur = require("../../../models/acteurs/commun/utilisateurModel");
+const activationCompte = require("../../../models/acteurs/commun/activationCompteModel");
+const env = require("../../../config/envConfig");
 
 function reponseUtilisateur(utilisateurConnecte) {
   return {

@@ -1,4 +1,4 @@
-const donneur = require("../models/donneurModel");
+const donneur = require("../../../models/acteurs/donneur/donneurModel");
 
 const groupesSanguins = new Set(["A", "B", "AB", "O"]);
 const rhesusAutorises = new Set(["POSITIF", "NEGATIF"]);

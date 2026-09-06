@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 
-const env = require("../config/envConfig");
-const utilisateur = require("../models/utilisateurModel");
+const env = require("../../../config/envConfig");
+const utilisateur = require("../../../models/acteurs/commun/utilisateurModel");
 
 // Cette fonction crée le premier administrateur lors de l'installation.
 async function creerPremierAdministrateur(req, res, next) {

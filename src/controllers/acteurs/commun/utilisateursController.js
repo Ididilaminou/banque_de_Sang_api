@@ -1,4 +1,4 @@
-const utilisateur = require("../models/utilisateurModel");
+const utilisateur = require("../../../models/acteurs/commun/utilisateurModel");
 
 async function consulterProfil(req, res) {
   return res.json({ ok: true, utilisateur: req.utilisateur });

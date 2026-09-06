@@ -1,5 +1,5 @@
-const don = require("../models/donModel");
-const donneur = require("../models/donneurModel");
+const don = require("../../../models/acteurs/banque/donModel");
+const donneur = require("../../../models/acteurs/donneur/donneurModel");
 
 const statutsAutorises = new Set(["ENREGISTRE", "VALIDE", "ANNULE"]);
 

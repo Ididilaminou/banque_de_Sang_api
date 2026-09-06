@@ -1,4 +1,4 @@
-const prisma = require("../config/prismaConfig");
+const prisma = require("../../../config/prismaConfig");
 
 module.exports = {
   // Remplace l'ancien code par un nouveau code d'activation.

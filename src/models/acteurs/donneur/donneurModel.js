@@ -1,4 +1,4 @@
-const prisma = require("../config/prismaConfig");
+const prisma = require("../../../config/prismaConfig");
 
 const selectionDonneur = {
   identifiant: true,

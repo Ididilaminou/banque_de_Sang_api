@@ -1,4 +1,4 @@
-const notification = require("../models/notificationModel");
+const notification = require("../../../models/acteurs/commun/notificationModel");
 
 // Affiche les notifications du compte connecté.
 async function lister(req, res, next) {

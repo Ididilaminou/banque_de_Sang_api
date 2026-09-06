@@ -1,4 +1,4 @@
-const stock = require("../models/stockModel");
+const stock = require("../../../models/acteurs/banque/stockModel");
 
 const produitsAutorises = new Set([
   "SANG_TOTAL",

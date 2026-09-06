@@ -1,0 +1,49 @@
+.application { max-width: 1240px; margin: 0 auto; padding: 0 48px; }
+.navigation { height: 88px; display: flex; align-items: center; justify-content: space-between; }
+.marque { display: flex; align-items: center; gap: 10px; color: #18232b; text-decoration: none; }
+.marque-logo { width: 35px; height: 35px; display: grid; place-items: center; background: #c8323c; color: white; border-radius: 50%; font-size: 25px; font-weight: 700; }
+.marque strong, .marque small { display: block; line-height: 1.05; }
+.marque strong { font-size: 17px; letter-spacing: -.5px; }
+.marque small { color: #c8323c; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+.navigation-actions { display: flex; align-items: center; gap: 24px; }
+.etat-api { color: #849097; font-size: 12px; display: flex; align-items: center; gap: 7px; }
+.point { width: 7px; height: 7px; border-radius: 50%; background: #c5cbd0; }
+.etat-api.en-ligne .point { background: #45a879; box-shadow: 0 0 0 4px #e2f4eb; }
+.bouton { border: 0; border-radius: 7px; padding: 12px 20px; font-weight: 600; }
+.bouton-secondaire { color: #24323a; background: transparent; border: 1px solid #d9dfe0; }
+.hero { min-height: 500px; display: flex; align-items: center; padding: 58px 7% 75px; border-bottom: 1px solid #e6e9e7; }
+.hero-contenu { width: 55%; z-index: 1; }
+.surtitre { color: #c8323c; font-size: 11px; text-transform: uppercase; letter-spacing: 2.2px; font-weight: 700; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(48px, 6vw, 78px); line-height: .98; letter-spacing: -3px; margin: 19px 0 24px; font-weight: 700; }
+h1 em { color: #c8323c; font-family: 'Playfair Display', serif; font-weight: 600; }
+.hero-contenu > p { color: #68767c; line-height: 1.7; max-width: 490px; font-size: 16px; }
+.hero-actions { display: flex; align-items: center; gap: 24px; margin-top: 34px; }
+.bouton-principal { color: white; background: #c8323c; box-shadow: 0 9px 20px #c8323c33; padding: 14px 24px; }
+.bouton-lien, .role-lien { background: none; color: #263740; padding: 0; }
+.bouton-lien span, .role-lien span { color: #c8323c; margin-left: 8px; font-size: 18px; }
+.hero-illustration { width: 45%; height: 370px; position: relative; }
+.illustration-cercle { position: absolute; border-radius: 50%; }
+.cercle-grand { width: 340px; height: 340px; right: 15px; top: 14px; background: #f4d9d6; }
+.cercle-petit { width: 90px; height: 90px; right: 0; top: 5px; background: #f1bf73; }
+.goutte { position: absolute; inset: 55px 105px auto auto; width: 150px; height: 190px; border-radius: 80% 20% 65% 35% / 60% 45% 55% 40%; transform: rotate(45deg); background: #c8323c; color: white; display: grid; place-items: center; font-size: 45px; box-shadow: -17px 22px 0 #aa2633; }
+.illustration-card { position: absolute; bottom: 15px; left: 10px; display: flex; gap: 12px; align-items: center; padding: 15px 18px; border-radius: 8px; background: white; box-shadow: 0 12px 30px #2437401c; }
+.illustration-card-icon { color: #c8323c; font-size: 27px; font-weight: 700; }
+.illustration-card strong, .illustration-card small { display: block; }
+.illustration-card strong { font-size: 13px; }
+.illustration-card small { color: #8a969a; font-size: 10px; margin-top: 3px; }
+.espaces { padding: 70px 0 76px; }
+.section-entete { display: flex; align-items: end; justify-content: space-between; margin-bottom: 30px; }
+.section-entete h2 { font-size: 31px; letter-spacing: -1px; margin-top: 10px; }
+.section-entete > p { color: #829096; font-size: 14px; max-width: 270px; line-height: 1.5; text-align: right; }
+.roles-grille { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.role-card { min-height: 205px; padding: 24px; border-radius: 9px; transition: transform .2s; }
+.role-card:hover { transform: translateY(-4px); }
+.role-card.red { background: #fae9e7; }.role-card.blue { background: #e8f1f4; }.role-card.gold { background: #fff2d9; }.role-card.dark { background: #263941; color: white; }
+.role-icone { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 50%; background: #c8323c; color: white; font-weight: 700; font-size: 24px; margin-bottom: 24px; }
+.blue .role-icone { background: #47899a; }.gold .role-icone { background: #d59a35; }.dark .role-icone { background: #d96970; }
+.role-card h3 { font-size: 17px; margin-bottom: 8px; }.role-card p { color: #77868a; font-size: 12px; line-height: 1.5; min-height: 38px; }.dark p { color: #bbc6c9; }
+.role-lien { margin-top: 19px; font-size: 12px; font-weight: 700; }.dark .role-lien { color: white; }
+footer { padding: 22px 0 35px; border-top: 1px solid #e6e9e7; display: flex; justify-content: space-between; color: #98a3a5; font-size: 11px; }
+@media (max-width: 800px) { .application { padding: 0 22px; }.navigation { height: 72px; }.etat-api { display: none; }.hero { padding: 45px 0; display: block; }.hero-contenu, .hero-illustration { width: 100%; }.hero-illustration { margin-top: 40px; height: 280px; }.cercle-grand { width: 250px; height: 250px; right: 30px; }.goutte { right: 95px; width: 110px; height: 140px; }.section-entete { display: block; }.section-entete > p { text-align: left; margin-top: 15px; }.roles-grille { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .navigation-actions .bouton { padding: 9px 12px; font-size: 12px; }.hero-actions { align-items: flex-start; flex-direction: column; gap: 18px; }.roles-grille { grid-template-columns: 1fr; } footer { display: block; } footer span { display: block; margin-top: 8px; } }

@@ -5,6 +5,7 @@ const routeurAuthentificationPrivee = require("./routes/acteurs/commun/authentif
 const routeurUtilisateursPrivees = require("./routes/acteurs/commun/utilisateursRoutePrivee");
 const routeurDonneursPrivees = require("./routes/acteurs/donneur/donneursRoutePrivee");
 const routeurEtablissementsPrivees = require("./routes/acteurs/administrateur/etablissementsRoutePrivee");
+const routeurEtablissementsPublique = require("./routes/acteurs/administrateur/etablissementsRoutePublique");
 const routeurActivationDonneurPrivee = require("./routes/acteurs/banque/activationDonneurRoutePrivee");
 const routeurPersonnelPrivee = require("./routes/acteurs/administrateur/personnelRoutePrivee");
 const routeurDonsPrivee = require("./routes/acteurs/banque/donsRoutePrivee");
@@ -80,6 +81,7 @@ app.use("/authentification", routeurAuthentificationPrivee);
 // Préfixe des routes utilisateurs
 app.use("/utilisateurs", routeurUtilisateursPrivees);
 app.use("/donneurs", routeurDonneursPrivees);
+app.use("/etablissements", routeurEtablissementsPublique);
 app.use("/etablissements", routeurEtablissementsPrivees);
 app.use("/donneurs", routeurActivationDonneurPrivee);
 app.use("/administrateurs/personnel", routeurPersonnelPrivee);

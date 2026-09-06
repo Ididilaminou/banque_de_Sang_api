@@ -67,6 +67,8 @@ module.exports = {
               prenom: true,
               nom: true,
               telephone: true,
+              courriel: true,
+              estActif: true,
             },
           },
         },

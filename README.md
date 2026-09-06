@@ -2,6 +2,11 @@
 
 Backend de la plateforme de don de sang (Node.js, Express, JavaScript, Prisma, MySQL).
 
+Le frontend React/TypeScript est un projet séparé dans
+`C:\Users\BRAYAN\aidora banque de sang\frontend`. Le backend reste indépendant
+dans `C:\Users\BRAYAN\aidora banque de sang\backend` et expose son API HTTP sur
+`http://localhost:3000`.
+
 ## Prérequis
 
 - Node.js

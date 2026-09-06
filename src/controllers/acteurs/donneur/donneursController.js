@@ -5,7 +5,7 @@ const groupesSanguins = new Set(["A", "B", "AB", "O"]);
 const rhesusAutorises = new Set(["POSITIF", "NEGATIF"]);
 
 async function rechercher(req, res, next) {
-  const { groupeSanguin, rhesus, disponible } = req.query;
+  const { groupeSanguin, rhesus, disponible, enAttente } = req.query;
   const filtres = {};
   const pagination = lirePagination(req.query);
   if (!pagination) return res.status(400).json({ ok: false, message: "La pagination est invalide. Utilisez page >= 1 et limite entre 1 et 100." });
@@ -20,6 +20,13 @@ async function rechercher(req, res, next) {
   if (disponible !== undefined) {
     if (disponible !== "true" && disponible !== "false") return res.status(400).json({ ok: false, message: "Le filtre disponible doit valoir true ou false." });
     filtres.estDisponible = disponible === "true";
+  }
+  if (enAttente !== undefined) {
+    if (enAttente !== "true" && enAttente !== "false") return res.status(400).json({ ok: false, message: "Le filtre enAttente doit valoir true ou false." });
+    filtres.utilisateur = { estActif: enAttente === "false" };
+  }
+  if (["PERSONNEL_BANQUE", "PERSONNEL_HOPITAL"].includes(req.utilisateur.role)) {
+    filtres.utilisateur = { ...filtres.utilisateur, etablissementIdentifiant: req.utilisateur.etablissementIdentifiant };
   }
   try {
     const resultats = await donneur.rechercher(filtres, pagination);

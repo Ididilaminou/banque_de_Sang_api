@@ -81,6 +81,14 @@ async function lister(req, res, next) {
   }
 }
 
+async function listerDisponibles(req, res, next) {
+  try {
+    return res.json({ ok: true, etablissements: await etablissement.listerDisponiblesPourDonneur() });
+  } catch (erreur) {
+    return next(erreur);
+  }
+}
+
 async function modifierStatut(req, res, next) {
   const identifiant = Number(req.params.identifiant);
   const { statut } = req.body;
@@ -153,4 +161,4 @@ async function modifierBanqueInterne(req, res, next) {
   }
 }
 
-module.exports = { creer, lister, modifierStatut, modifierBanqueInterne };
+module.exports = { creer, lister, listerDisponibles, modifierStatut, modifierBanqueInterne };

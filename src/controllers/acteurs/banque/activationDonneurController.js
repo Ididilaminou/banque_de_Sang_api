@@ -35,6 +35,7 @@ async function verifierEtGenererCode(req, res, next) {
         role: true,
         estActif: true,
         prenom: true,
+        etablissementIdentifiant: true,
       },
     );
 
@@ -50,6 +51,9 @@ async function verifierEtGenererCode(req, res, next) {
         ok: false,
         message: "Ce compte donneur est déjà actif.",
       });
+    }
+    if (req.utilisateur.role === "PERSONNEL_BANQUE" && donneur.etablissementIdentifiant !== req.utilisateur.etablissementIdentifiant) {
+      return res.status(403).json({ ok: false, message: "Ce donneur n'est pas rattaché à votre établissement." });
     }
 
     // Le code complet est communiqué au donneur, mais seul son hash est stocké.

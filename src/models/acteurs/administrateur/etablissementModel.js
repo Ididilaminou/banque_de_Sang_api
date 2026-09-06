@@ -75,6 +75,20 @@ module.exports = {
     });
   },
 
+  listerDisponiblesPourDonneur() {
+    return prisma.etablissement.findMany({
+      where: {
+        statut: "AUTORISE",
+        OR: [
+          { type: "BANQUE_SANG" },
+          { type: "HOPITAL", possedeBanqueSangInterne: true },
+        ],
+      },
+      select: { identifiant: true, nom: true, type: true, ville: true },
+      orderBy: { nom: "asc" },
+    });
+  },
+
   modifierStatut(identifiant, statut) {
     return prisma.etablissement.update({
       where: { identifiant },

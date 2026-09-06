@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const utilisateur = require("../../../models/acteurs/commun/utilisateurModel");
 const activationCompte = require("../../../models/acteurs/commun/activationCompteModel");
 const env = require("../../../config/envConfig");
+const etablissement = require("../../../models/acteurs/administrateur/etablissementModel");
 
 function reponseUtilisateur(utilisateurConnecte) {
   return {
@@ -20,7 +21,7 @@ function reponseUtilisateur(utilisateurConnecte) {
 }
 
 async function inscrire(req, res, next) {
-  const { courriel, motDePasse, prenom, nom, telephone } = req.body;
+  const { courriel, motDePasse, prenom, nom, telephone, groupeSanguin, rhesus, etablissementIdentifiant } = req.body;
 
   if (
     typeof courriel !== "string" ||
@@ -54,6 +55,18 @@ async function inscrire(req, res, next) {
     return res.status(400).json({ ok: false, message: "Le format du courriel est invalide." });
   }
 
+  const groupesAutorises = new Set(["A", "B", "AB", "O"]);
+  const rhesusAutorises = new Set(["POSITIF", "NEGATIF"]);
+  if ((groupeSanguin !== undefined || rhesus !== undefined) && (!groupesAutorises.has(groupeSanguin) || !rhesusAutorises.has(rhesus))) {
+    return res.status(400).json({ ok: false, message: "Le groupe sanguin et le rhésus sont obligatoires pour créer le profil donneur." });
+  }
+
+  let rattachement = null;
+  if (etablissementIdentifiant !== undefined) {
+    rattachement = await etablissement.trouverGestionnaireStockAutorise(Number(etablissementIdentifiant));
+    if (!rattachement) return res.status(400).json({ ok: false, message: "La banque ou l'hôpital choisi n'est pas autorisé à recevoir des donneurs." });
+  }
+
   try {
     if (await utilisateur.trouverParCourriel(courrielNormalise)) {
       return res.status(409).json({ ok: false, message: "Un utilisateur existe déjà avec ce courriel." });
@@ -67,6 +80,16 @@ async function inscrire(req, res, next) {
       nom: nomNormalise,
       telephone: typeof telephone === "string" ? telephone.trim() || null : null,
       estActif: false,
+      etablissementIdentifiant: rattachement ? rattachement.identifiant : null,
+      ...(groupeSanguin && rhesus ? {
+        donneur: {
+          create: {
+            groupeSanguin,
+            rhesus,
+            dossier: { create: {} },
+          },
+        },
+      } : {}),
     });
 
     return res.status(201).json({ ok: true, message: "Inscription réussie.", utilisateur: cree });
@@ -136,8 +159,15 @@ async function connecter(req, res, next) {
 
   try {
     const trouve = await utilisateur.trouverParCourriel(courriel.trim().toLowerCase());
-    if (!trouve || !trouve.estActif || !(await bcrypt.compare(motDePasse, trouve.motDePasseHash))) {
+    if (!trouve || !(await bcrypt.compare(motDePasse, trouve.motDePasseHash))) {
       return res.status(401).json({ ok: false, message: "Courriel ou mot de passe incorrect." });
+    }
+    if (!trouve.estActif) {
+      return res.status(403).json({
+        ok: false,
+        activationNecessaire: true,
+        message: "Votre compte n'est pas encore activé. Demandez votre code à une banque de sang, puis activez votre compte.",
+      });
     }
     if (!env.jwtSecret) return next(new Error("JWT_SECRET est obligatoire pour générer un jeton."));
 

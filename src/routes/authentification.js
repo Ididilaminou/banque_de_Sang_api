@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const prisma = require("../config/prisma");
 const env = require("../config/env");
+const authentifierUtilisateur = require("../middlewares/authentification");
 
 const routeur = express.Router();
 
@@ -162,5 +163,65 @@ routeur.post("/connexion", async (req, res, next) => {
     return next(erreur);
   }
 });
+
+routeur.put(
+  "/mot-de-passe",
+  authentifierUtilisateur,
+  async (req, res, next) => {
+    const { ancienMotDePasse, nouveauMotDePasse } = req.body;
+
+    if (
+      typeof ancienMotDePasse !== "string" ||
+      typeof nouveauMotDePasse !== "string"
+    ) {
+      return res.status(400).json({
+        ok: false,
+        message:
+          "Les champs ancienMotDePasse et nouveauMotDePasse sont obligatoires.",
+      });
+    }
+
+    if (nouveauMotDePasse.length < 8) {
+      return res.status(400).json({
+        ok: false,
+        message: "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+      });
+    }
+
+    try {
+      const utilisateur = await prisma.utilisateur.findUnique({
+        where: { identifiant: req.utilisateur.identifiant },
+        select: { motDePasseHash: true },
+      });
+
+      if (
+        !utilisateur ||
+        !(await bcrypt.compare(
+          ancienMotDePasse,
+          utilisateur.motDePasseHash,
+        ))
+      ) {
+        return res.status(401).json({
+          ok: false,
+          message: "L'ancien mot de passe est incorrect.",
+        });
+      }
+
+      const motDePasseHash = await bcrypt.hash(nouveauMotDePasse, 12);
+
+      await prisma.utilisateur.update({
+        where: { identifiant: req.utilisateur.identifiant },
+        data: { motDePasseHash },
+      });
+
+      return res.json({
+        ok: true,
+        message: "Mot de passe modifié avec succès.",
+      });
+    } catch (erreur) {
+      return next(erreur);
+    }
+  },
+);
 
 module.exports = routeur;

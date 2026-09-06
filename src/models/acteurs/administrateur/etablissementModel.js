@@ -40,7 +40,10 @@ module.exports = {
 
   creer(donnees) {
     return prisma.etablissement.create({
-      data: donnees,
+      data: {
+        ...donnees,
+        dossier: { create: {} },
+      },
       select: selectionEtablissement,
     });
   },

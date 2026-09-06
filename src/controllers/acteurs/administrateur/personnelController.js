@@ -73,6 +73,7 @@ async function creerPersonnel(req, res, next) {
       estActif: true,
       doitChangerMotDePasse: true,
       etablissementIdentifiant: identifiantEtablissement,
+      dossierPersonnel: { create: {} },
     });
 
     try {

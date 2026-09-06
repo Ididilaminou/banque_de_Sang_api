@@ -29,7 +29,12 @@ module.exports = {
   enregistrer(utilisateurIdentifiant, groupeSanguin, rhesus) {
     return prisma.donneur.upsert({
       where: { utilisateurIdentifiant },
-      create: { utilisateurIdentifiant, groupeSanguin, rhesus },
+      create: {
+        utilisateurIdentifiant,
+        groupeSanguin,
+        rhesus,
+        dossier: { create: {} },
+      },
       update: { groupeSanguin, rhesus },
       select: selectionDonneur,
     });

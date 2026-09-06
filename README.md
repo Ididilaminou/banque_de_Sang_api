@@ -49,6 +49,20 @@ Les routes sont rangées par acteur pour faciliter la navigation. Cette organisa
 ne change pas les URLs publiques de l'API : elle change uniquement l'emplacement
 des fichiers dans le projet.
 
+### Dossiers des acteurs
+
+Les tables métier restent séparées des tables de dossiers :
+
+- `dossiers_donneurs` est lié à `donneurs` ;
+- `dossiers_personnels` est lié aux comptes `utilisateurs` du personnel ;
+- `dossiers_etablissements` est lié à `etablissements` ;
+- `dossiers_administrateurs` est lié aux comptes administrateurs.
+
+Un dossier contient le statut, les notes et les dates de suivi. Il ne duplique pas
+les informations métier. Les dossiers sont créés automatiquement lorsqu'un profil
+ou un compte concerné est créé. Plusieurs personnels peuvent donc avoir chacun
+leur dossier tout en étant rattachés au même établissement.
+
 Les URLs existantes restent inchangées. Par exemple :
 
 - `POST /authentification/inscription` est une route publique ;

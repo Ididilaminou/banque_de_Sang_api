@@ -57,6 +57,8 @@ model Utilisateur {
   activationCompte  ActivationCompte?
   notifications     Notification[]
   etablissement     Etablissement? @relation(fields: [etablissementIdentifiant], references: [identifiant])
+  dossierPersonnel  DossierPersonnel?
+  dossierAdministrateur DossierAdministrateur?
 
   @@map("utilisateurs")
 }
@@ -73,6 +75,7 @@ model Donneur {
   dons                     Don[]
   recommandations          RecommandationDonneur[]
   testsEligibilite         TestEligibilite[]
+  dossier                  DossierDonneur?
 
   utilisateur              Utilisateur   @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
 
@@ -151,8 +154,61 @@ model Etablissement {
   demandesEmises    DemandeSang[]       @relation("EtablissementDemandeur")
   demandesRecues    DemandeSang[]       @relation("EtablissementDestinataire")
   utilisateurs      Utilisateur[]
+  dossier           DossierEtablissement?
 
   @@map("etablissements")
+}
+
+model DossierDonneur {
+  identifiant       Int      @id @default(autoincrement())
+  donneurIdentifiant Int     @unique
+  statut            String   @default("ACTIF") @db.VarChar(30)
+  notes             String?  @db.Text
+  dateOuverture     DateTime @default(now())
+  dateModification  DateTime @updatedAt
+
+  donneur           Donneur  @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@map("dossiers_donneurs")
+}
+
+model DossierPersonnel {
+  identifiant            Int          @id @default(autoincrement())
+  utilisateurIdentifiant Int          @unique
+  statut                 String       @default("ACTIF") @db.VarChar(30)
+  notes                  String?      @db.Text
+  dateOuverture          DateTime     @default(now())
+  dateModification       DateTime     @updatedAt
+
+  utilisateur            Utilisateur  @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@map("dossiers_personnels")
+}
+
+model DossierEtablissement {
+  identifiant            Int           @id @default(autoincrement())
+  etablissementIdentifiant Int         @unique
+  statut                 String        @default("ACTIF") @db.VarChar(30)
+  notes                  String?       @db.Text
+  dateOuverture          DateTime      @default(now())
+  dateModification       DateTime      @updatedAt
+
+  etablissement          Etablissement @relation(fields: [etablissementIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@map("dossiers_etablissements")
+}
+
+model DossierAdministrateur {
+  identifiant            Int          @id @default(autoincrement())
+  utilisateurIdentifiant Int          @unique
+  statut                 String       @default("ACTIF") @db.VarChar(30)
+  notes                  String?      @db.Text
+  dateOuverture          DateTime     @default(now())
+  dateModification       DateTime     @updatedAt
+
+  utilisateur            Utilisateur  @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
+
+  @@map("dossiers_administrateurs")
 }
 
 enum StatutDemandeSang {

@@ -69,6 +69,7 @@ async function creerPremierAdministrateur(req, res, next) {
       role: "ADMINISTRATEUR",
       estActif: true,
       doitChangerMotDePasse: false,
+      dossierAdministrateur: { create: {} },
     });
 
     return res.status(201).json({

@@ -35,6 +35,11 @@ module.exports = {
     });
   },
 
+  // Supprime un compte créé si l'envoi de son email échoue.
+  supprimer(identifiant) {
+    return prisma.utilisateur.delete({ where: { identifiant } });
+  },
+
   lister() {
     return prisma.utilisateur.findMany({
       select: { ...selectionPublique, dateCreation: true },

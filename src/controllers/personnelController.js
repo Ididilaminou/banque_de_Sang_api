@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
 const utilisateur = require("../models/utilisateurModel");
+const emailService = require("../services/emailService");
 
 const rolesPersonnel = new Set(["PERSONNEL_BANQUE", "PERSONNEL_HOPITAL"]);
 
@@ -59,12 +60,23 @@ async function creerPersonnel(req, res, next) {
       doitChangerMotDePasse: true,
     });
 
+    try {
+      // L'email contient les accès ; le mot de passe n'est donc plus renvoyé par l'API.
+      await emailService.envoyerAccesPersonnel({
+        courriel: cree.courriel,
+        prenom: cree.prenom,
+        motDePasseTemporaire,
+      });
+    } catch (erreurEmail) {
+      // On évite de laisser un compte inutilisable si Gmail refuse l'envoi.
+      await utilisateur.supprimer(cree.identifiant);
+      return next(erreurEmail);
+    }
+
     return res.status(201).json({
       ok: true,
-      message: "Compte du personnel créé. Le mot de passe sera envoyé par email.",
+      message: "Compte du personnel créé. Les accès ont été envoyés par email.",
       utilisateur: cree,
-      // Temporaire pour les tests locaux avant le branchement Gmail SMTP.
-      motDePasseTemporaire,
     });
   } catch (erreur) {
     if (erreur.code === "P2002") {

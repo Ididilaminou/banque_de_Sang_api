@@ -64,7 +64,7 @@ Authorization: Bearer JETON_DU_PERSONNEL
 
 Le système génère un code au format `AID-XXXXXX`, valable 24 heures. Pour le test local,
 le code est retourné dans la réponse. Il sera envoyé par email lorsque le service
-Gmail SMTP sera branché.
+Gmail SMTP sera utilisé pour ce parcours.
 
 Le donneur active ensuite son compte :
 
@@ -99,8 +99,12 @@ Authorization: Bearer JETON_ADMINISTRATEUR
 ```
 
 Les rôles acceptés sont `PERSONNEL_BANQUE` et `PERSONNEL_HOPITAL`.
-Le mot de passe est temporairement retourné dans la réponse pour les tests
-locaux. Il sera envoyé par email après l'intégration de Gmail SMTP.
+Les accès sont envoyés par Gmail SMTP. Le mot de passe temporaire n'est jamais
+retourné par l'API.
+
+Configure les variables `SMTP_UTILISATEUR`, `SMTP_MOT_DE_PASSE`,
+`ADRESSE_EXPEDITEUR` et `URL_APPLICATION` dans `.env`. Avec Gmail, utilise un
+mot de passe d'application, pas le mot de passe principal du compte.
 
 Lors de sa première connexion, le personnel reçoit `doitChangerMotDePasse: true`.
 Les routes métier sont bloquées jusqu'à l'appel suivant :

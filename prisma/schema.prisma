@@ -1,5 +1,7 @@
-// Schéma Prisma : la "carte" de la base MySQL.
-// Les modèles et attributs métier sont nommés en français.
+// ============================================================
+// SCHÉMA PRISMA - AIDORA
+// Gestion des donneurs, établissements et banques de sang
+// ============================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -8,6 +10,10 @@ generator client {
 datasource db {
   provider = "mysql"
 }
+
+// ============================================================
+// ENUMERATIONS
+// ============================================================
 
 enum Role {
   DONNEUR
@@ -39,180 +45,16 @@ enum StatutEtablissement {
   SUSPENDU
 }
 
-model Utilisateur {
-  identifiant       Int      @id @default(autoincrement())
-  courriel          String   @unique @db.VarChar(255)
-  motDePasseHash    String   @db.VarChar(255)
-  prenom            String   @db.VarChar(100)
-  nom               String   @db.VarChar(100)
-  telephone         String?  @db.VarChar(30)
-  role              Role     @default(DONNEUR)
-  estActif          Boolean  @default(true)
-  doitChangerMotDePasse Boolean @default(false)
-  etablissementIdentifiant Int?
-  dateCreation      DateTime @default(now())
-  dateModification  DateTime @updatedAt
-
-  donneur           Donneur?
-  activationCompte  ActivationCompte?
-  notifications     Notification[]
-  etablissement     Etablissement? @relation(fields: [etablissementIdentifiant], references: [identifiant])
-  dossierPersonnel  DossierPersonnel?
-  dossierAdministrateur DossierAdministrateur?
-  mouvementsStock    MouvementStock[]
-  historiquesDemandes HistoriqueDemandeSang[]
-  journauxAudit      JournalAudit[]
-
-  @@map("utilisateurs")
-}
-
-model Donneur {
-  identifiant              Int           @id @default(autoincrement())
-  utilisateurIdentifiant   Int           @unique
-  groupeSanguin            GroupeSanguin
-  rhesus                   Rhesus
-  estDisponible            Boolean       @default(false)
-  dateDerniereDisponibilite DateTime?
-  dateCreation             DateTime      @default(now())
-  dateModification         DateTime      @updatedAt
-  dons                     Don[]
-  recommandations          RecommandationDonneur[]
-  testsEligibilite         TestEligibilite[]
-  dossier                  DossierDonneur?
-
-  utilisateur              Utilisateur   @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@map("donneurs")
-}
-
 enum ResultatEligibilite {
   ELIGIBLE
   NON_ELIGIBLE
   A_VALIDER
 }
 
-model TestEligibilite {
-  identifiant             Int                 @id @default(autoincrement())
-  donneurIdentifiant      Int
-  age                     Int
-  poidsKg                 Float
-  fievreRecente           Boolean
-  maladieEnCours          Boolean
-  prendAntibiotiques      Boolean
-  grossesseOuAllaitement  Boolean
-  tatouageRecent          Boolean
-  transfusionRecente      Boolean
-  operationRecente        Boolean
-  vaccinationRecente      Boolean
-  infectionRecente        Boolean
-  voyageRecent            Boolean
-  dernierDonDate          DateTime?
-  resultat                ResultatEligibilite
-  motif                   String              @db.VarChar(500)
-  analyseIa               String?             @db.Text
-  recommandations        String?             @db.Text
-  validationProfessionnel Boolean             @default(false)
-  dateCreation            DateTime            @default(now())
-
-  donneur                 Donneur             @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@index([donneurIdentifiant, dateCreation])
-  @@map("tests_eligibilite")
-}
-
 enum StatutDon {
   ENREGISTRE
   VALIDE
   ANNULE
-}
-
-model Don {
-  identifiant            Int       @id @default(autoincrement())
-  donneurIdentifiant     Int
-  dateDon                DateTime
-  volumeMillilitres      Int
-  statut                 StatutDon @default(ENREGISTRE)
-  commentaire            String?   @db.VarChar(500)
-  dateCreation           DateTime  @default(now())
-  dateModification       DateTime  @updatedAt
-
-  donneur                Donneur   @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@index([donneurIdentifiant, dateDon])
-  @@map("dons")
-}
-
-model Etablissement {
-  identifiant       Int                  @id @default(autoincrement())
-  nom               String               @db.VarChar(150)
-  type              TypeEtablissement
-  adresse           String               @db.VarChar(255)
-  ville             String               @db.VarChar(100)
-  telephone         String?              @db.VarChar(30)
-  courriel          String               @unique @db.VarChar(255)
-  statut            StatutEtablissement @default(EN_ATTENTE)
-  possedeBanqueSangInterne Boolean      @default(false)
-  dateCreation      DateTime             @default(now())
-  dateModification  DateTime             @updatedAt
-  stocks            Stock[]
-  demandesEmises    DemandeSang[]       @relation("EtablissementDemandeur")
-  demandesRecues    DemandeSang[]       @relation("EtablissementDestinataire")
-  utilisateurs      Utilisateur[]
-  dossier           DossierEtablissement?
-
-  @@map("etablissements")
-}
-
-model DossierDonneur {
-  identifiant       Int      @id @default(autoincrement())
-  donneurIdentifiant Int     @unique
-  statut            String   @default("ACTIF") @db.VarChar(30)
-  notes             String?  @db.Text
-  dateOuverture     DateTime @default(now())
-  dateModification  DateTime @updatedAt
-
-  donneur           Donneur  @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@map("dossiers_donneurs")
-}
-
-model DossierPersonnel {
-  identifiant            Int          @id @default(autoincrement())
-  utilisateurIdentifiant Int          @unique
-  statut                 String       @default("ACTIF") @db.VarChar(30)
-  notes                  String?      @db.Text
-  dateOuverture          DateTime     @default(now())
-  dateModification       DateTime     @updatedAt
-
-  utilisateur            Utilisateur  @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@map("dossiers_personnels")
-}
-
-model DossierEtablissement {
-  identifiant            Int           @id @default(autoincrement())
-  etablissementIdentifiant Int         @unique
-  statut                 String        @default("ACTIF") @db.VarChar(30)
-  notes                  String?       @db.Text
-  dateOuverture          DateTime      @default(now())
-  dateModification       DateTime      @updatedAt
-
-  etablissement          Etablissement @relation(fields: [etablissementIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@map("dossiers_etablissements")
-}
-
-model DossierAdministrateur {
-  identifiant            Int          @id @default(autoincrement())
-  utilisateurIdentifiant Int          @unique
-  statut                 String       @default("ACTIF") @db.VarChar(30)
-  notes                  String?      @db.Text
-  dateOuverture          DateTime     @default(now())
-  dateModification       DateTime     @updatedAt
-
-  utilisateur            Utilisateur  @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@map("dossiers_administrateurs")
 }
 
 enum StatutDemandeSang {
@@ -224,100 +66,10 @@ enum StatutDemandeSang {
   ANNULEE
 }
 
-model DemandeSang {
-  identifiant                    Int                @id @default(autoincrement())
-  etablissementDemandeurId      Int
-  etablissementDestinataireId   Int?
-  produit                       TypeProduitSanguin
-  groupeSanguin                 GroupeSanguin
-  rhesus                        Rhesus
-  quantite                      Int
-  urgence                       Boolean            @default(false)
-  motif                         String             @db.VarChar(500)
-  statut                        StatutDemandeSang  @default(EN_ATTENTE)
-  dateCreation                  DateTime           @default(now())
-  dateModification              DateTime           @updatedAt
-
-  etablissementDemandeur        Etablissement      @relation("EtablissementDemandeur", fields: [etablissementDemandeurId], references: [identifiant])
-  etablissementDestinataire     Etablissement?     @relation("EtablissementDestinataire", fields: [etablissementDestinataireId], references: [identifiant])
-  notifications                  Notification[]
-  recommandations               RecommandationDonneur[]
-  historique                    HistoriqueDemandeSang[]
-
-  @@index([statut, urgence])
-  @@map("demandes_sang")
-}
-
-model HistoriqueDemandeSang {
-  identifiant            Int               @id @default(autoincrement())
-  demandeSangIdentifiant Int
-  utilisateurIdentifiant Int
-  ancienStatut           StatutDemandeSang
-  nouveauStatut          StatutDemandeSang
-  commentaire            String?           @db.VarChar(500)
-  dateCreation           DateTime          @default(now())
-
-  demandeSang            DemandeSang       @relation(fields: [demandeSangIdentifiant], references: [identifiant], onDelete: Cascade)
-  utilisateur            Utilisateur       @relation(fields: [utilisateurIdentifiant], references: [identifiant])
-
-  @@index([demandeSangIdentifiant, dateCreation])
-  @@map("historiques_demandes_sang")
-}
-
-model JournalAudit {
-  identifiant            Int       @id @default(autoincrement())
-  utilisateurIdentifiant Int
-  action                 String    @db.VarChar(80)
-  ressource              String    @db.VarChar(80)
-  ressourceIdentifiant   Int?
-  details                String?   @db.Text
-  dateCreation           DateTime  @default(now())
-
-  utilisateur            Utilisateur @relation(fields: [utilisateurIdentifiant], references: [identifiant])
-
-  @@index([ressource, ressourceIdentifiant, dateCreation])
-  @@index([utilisateurIdentifiant, dateCreation])
-  @@map("journaux_audit")
-}
-
 enum StatutRecommandation {
   EN_ATTENTE
   ACCEPTEE
   REFUSEE
-}
-
-model RecommandationDonneur {
-  identifiant            Int                   @id @default(autoincrement())
-  demandeSangIdentifiant Int
-  donneurIdentifiant     Int
-  statut                 StatutRecommandation @default(EN_ATTENTE)
-  dateCreation           DateTime              @default(now())
-  dateReponse            DateTime?
-
-  demandeSang            DemandeSang           @relation(fields: [demandeSangIdentifiant], references: [identifiant], onDelete: Cascade)
-  donneur                Donneur               @relation(fields: [donneurIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@unique([demandeSangIdentifiant, donneurIdentifiant])
-  @@index([donneurIdentifiant, statut])
-  @@map("recommandations_donneurs")
-}
-
-model Notification {
-  identifiant             Int          @id @default(autoincrement())
-  utilisateurIdentifiant  Int
-  demandeSangIdentifiant  Int?
-  type                    String       @db.VarChar(60)
-  titre                   String       @db.VarChar(150)
-  message                 String       @db.VarChar(500)
-  estLue                  Boolean      @default(false)
-  dateCreation            DateTime     @default(now())
-  dateLecture             DateTime?
-
-  utilisateur             Utilisateur  @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
-  demandeSang             DemandeSang? @relation(fields: [demandeSangIdentifiant], references: [identifiant], onDelete: Cascade)
-
-  @@index([utilisateurIdentifiant, estLue, dateCreation])
-  @@map("notifications")
 }
 
 enum TypeProduitSanguin {
@@ -327,59 +79,712 @@ enum TypeProduitSanguin {
   PLASMA
 }
 
-model Stock {
-  identifiant          Int                 @id @default(autoincrement())
-  etablissementIdentifiant Int
-  produit              TypeProduitSanguin
-  groupeSanguin        GroupeSanguin
-  rhesus               Rhesus
-  quantite             Int                 @default(0)
-  seuilAlerte          Int                 @default(5)
-  dateCreation         DateTime            @default(now())
-  dateModification     DateTime            @updatedAt
-
-  etablissement        Etablissement      @relation(fields: [etablissementIdentifiant], references: [identifiant], onDelete: Cascade)
-  mouvements           MouvementStock[]
-
-  @@unique([etablissementIdentifiant, produit, groupeSanguin, rhesus])
-  @@index([groupeSanguin, rhesus, produit])
-  @@map("stocks")
-}
-
 enum TypeMouvementStock {
   ENTREE
   SORTIE
   AJUSTEMENT
 }
 
-model MouvementStock {
-  identifiant          Int                @id @default(autoincrement())
-  stockIdentifiant     Int
-  utilisateurIdentifiant Int
-  type                 TypeMouvementStock
-  ancienneQuantite     Int
-  nouvelleQuantite     Int
-  commentaire          String?            @db.VarChar(500)
-  dateCreation         DateTime           @default(now())
+enum StatutRattachement {
+  EN_ATTENTE
+  CONFIRME
+  REFUSE
+  ANNULE
+}
 
-  stock                Stock              @relation(fields: [stockIdentifiant], references: [identifiant], onDelete: Cascade)
-  utilisateur          Utilisateur        @relation(fields: [utilisateurIdentifiant], references: [identifiant])
+// ============================================================
+// UTILISATEUR
+// ============================================================
+
+model Utilisateur {
+  identifiant                Int      @id @default(autoincrement())
+  courriel                   String   @unique @db.VarChar(255)
+  motDePasseHash             String   @db.VarChar(255)
+  prenom                     String   @db.VarChar(100)
+  nom                        String   @db.VarChar(100)
+  telephone                  String?  @db.VarChar(30)
+
+  role                       Role     @default(DONNEUR)
+
+  estActif                   Boolean  @default(true)
+  doitChangerMotDePasse      Boolean  @default(false)
+
+  // ATTENTION :
+  // Ce champ représente l'établissement de rattachement
+  // administratif actuel de l'utilisateur.
+  //
+  // Pour un donneur, il ne doit être renseigné qu'après
+  // confirmation du rattachement.
+  etablissementIdentifiant   Int?
+
+  dateCreation               DateTime @default(now())
+  dateModification           DateTime @updatedAt
+
+  // -------------------------
+  // Relations
+  // -------------------------
+
+  donneur                    Donneur?
+
+  activationCompte           ActivationCompte?
+
+  notifications              Notification[]
+
+  etablissement              Etablissement? @relation(
+    fields: [etablissementIdentifiant],
+    references: [identifiant]
+  )
+
+  dossierPersonnel           DossierPersonnel?
+
+  dossierAdministrateur      DossierAdministrateur?
+
+  mouvementsStock            MouvementStock[]
+
+  historiquesDemandes        HistoriqueDemandeSang[]
+
+  journauxAudit              JournalAudit[]
+
+  @@index([etablissementIdentifiant])
+  @@index([role])
+  @@map("utilisateurs")
+}
+
+// ============================================================
+// DONNEUR
+// ============================================================
+
+model Donneur {
+  identifiant                  Int          @id @default(autoincrement())
+
+  utilisateurIdentifiant       Int          @unique
+
+  groupeSanguin                 GroupeSanguin
+  rhesus                        Rhesus
+
+  estDisponible                Boolean      @default(false)
+  dateDerniereDisponibilite    DateTime?
+
+  dateCreation                 DateTime     @default(now())
+  dateModification             DateTime     @updatedAt
+
+  // -------------------------
+  // Relations
+  // -------------------------
+
+  utilisateur                  Utilisateur  @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  dons                         Don[]
+
+  recommandations              RecommandationDonneur[]
+
+  testsEligibilite             TestEligibilite[]
+
+  dossier                      DossierDonneur?
+
+  rattachements                RattachementDonneur[]
+
+  @@index([groupeSanguin, rhesus])
+  @@map("donneurs")
+}
+
+// ============================================================
+// TEST D'ÉLIGIBILITÉ
+// ============================================================
+
+model TestEligibilite {
+  identifiant                  Int                 @id @default(autoincrement())
+
+  donneurIdentifiant           Int
+
+  age                          Int
+  poidsKg                      Float
+
+  fievreRecente                Boolean
+  maladieEnCours               Boolean
+  prendAntibiotiques           Boolean
+  grossesseOuAllaitement       Boolean
+  tatouageRecent               Boolean
+  transfusionRecente           Boolean
+  operationRecente             Boolean
+  vaccinationRecente           Boolean
+  infectionRecente             Boolean
+  voyageRecent                 Boolean
+
+  dernierDonDate               DateTime?
+
+  resultat                     ResultatEligibilite
+
+  motif                        String              @db.VarChar(500)
+
+  analyseIa                    String?             @db.Text
+  recommandations              String?             @db.Text
+
+  validationProfessionnel      Boolean             @default(false)
+
+  dateCreation                 DateTime            @default(now())
+
+  donneur                      Donneur             @relation(
+    fields: [donneurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@index([donneurIdentifiant, dateCreation])
+  @@map("tests_eligibilite")
+}
+
+// ============================================================
+// DON
+// ============================================================
+
+model Don {
+  identifiant                  Int       @id @default(autoincrement())
+
+  donneurIdentifiant           Int
+
+  dateDon                      DateTime
+
+  volumeMillilitres            Int
+
+  statut                       StatutDon @default(ENREGISTRE)
+
+  commentaire                  String?   @db.VarChar(500)
+
+  dateCreation                 DateTime  @default(now())
+  dateModification             DateTime  @updatedAt
+
+  donneur                      Donneur   @relation(
+    fields: [donneurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@index([donneurIdentifiant, dateDon])
+  @@map("dons")
+}
+
+// ============================================================
+// ETABLISSEMENT
+// ============================================================
+
+model Etablissement {
+  identifiant                  Int                  @id @default(autoincrement())
+
+  nom                          String               @db.VarChar(150)
+
+  type                         TypeEtablissement
+
+  adresse                      String               @db.VarChar(255)
+
+  ville                        String               @db.VarChar(100)
+
+  telephone                    String?              @db.VarChar(30)
+
+  courriel                     String               @unique @db.VarChar(255)
+
+  statut                       StatutEtablissement  @default(EN_ATTENTE)
+
+  possedeBanqueSangInterne     Boolean              @default(false)
+
+  dateCreation                 DateTime             @default(now())
+
+  dateModification             DateTime             @updatedAt
+
+  // -------------------------
+  // Relations
+  // -------------------------
+
+  stocks                       Stock[]
+
+  demandesEmises              DemandeSang[] @relation(
+    "EtablissementDemandeur"
+  )
+
+  demandesRecues              DemandeSang[] @relation(
+    "EtablissementDestinataire"
+  )
+
+  utilisateurs                 Utilisateur[]
+
+  dossier                      DossierEtablissement?
+
+  rattachementsDonneurs        RattachementDonneur[]
+
+  @@index([type])
+  @@index([statut])
+  @@index([ville])
+  @@map("etablissements")
+}
+
+// ============================================================
+// DOSSIER DONNEUR
+// ============================================================
+
+model DossierDonneur {
+  identifiant                  Int      @id @default(autoincrement())
+
+  donneurIdentifiant            Int      @unique
+
+  statut                        String   @default("ACTIF") @db.VarChar(30)
+
+  notes                         String?  @db.Text
+
+  dateOuverture                 DateTime @default(now())
+
+  dateModification              DateTime @updatedAt
+
+  donneur                       Donneur  @relation(
+    fields: [donneurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@map("dossiers_donneurs")
+}
+
+// ============================================================
+// DOSSIER PERSONNEL
+// ============================================================
+
+model DossierPersonnel {
+  identifiant                  Int          @id @default(autoincrement())
+
+  utilisateurIdentifiant       Int          @unique
+
+  statut                       String       @default("ACTIF") @db.VarChar(30)
+
+  notes                        String?      @db.Text
+
+  dateOuverture                DateTime     @default(now())
+
+  dateModification             DateTime     @updatedAt
+
+  utilisateur                  Utilisateur  @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@map("dossiers_personnels")
+}
+
+// ============================================================
+// DOSSIER ETABLISSEMENT
+// ============================================================
+
+model DossierEtablissement {
+  identifiant                  Int           @id @default(autoincrement())
+
+  etablissementIdentifiant     Int           @unique
+
+  statut                       String        @default("ACTIF") @db.VarChar(30)
+
+  notes                        String?       @db.Text
+
+  dateOuverture                DateTime      @default(now())
+
+  dateModification             DateTime      @updatedAt
+
+  etablissement                Etablissement @relation(
+    fields: [etablissementIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@map("dossiers_etablissements")
+}
+
+// ============================================================
+// DOSSIER ADMINISTRATEUR
+// ============================================================
+
+model DossierAdministrateur {
+  identifiant                  Int          @id @default(autoincrement())
+
+  utilisateurIdentifiant       Int          @unique
+
+  statut                       String       @default("ACTIF") @db.VarChar(30)
+
+  notes                        String?      @db.Text
+
+  dateOuverture                DateTime     @default(now())
+
+  dateModification             DateTime     @updatedAt
+
+  utilisateur                  Utilisateur  @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@map("dossiers_administrateurs")
+}
+
+// ============================================================
+// DEMANDE DE SANG
+// ============================================================
+
+model DemandeSang {
+  identifiant                  Int                @id @default(autoincrement())
+
+  etablissementDemandeurId    Int
+
+  etablissementDestinataireId Int?
+
+  produit                      TypeProduitSanguin
+
+  groupeSanguin                GroupeSanguin
+
+  rhesus                       Rhesus
+
+  quantite                     Int
+
+  urgence                      Boolean            @default(false)
+
+  motif                        String             @db.VarChar(500)
+
+  statut                       StatutDemandeSang  @default(EN_ATTENTE)
+
+  dateCreation                 DateTime           @default(now())
+
+  dateModification             DateTime           @updatedAt
+
+  // -------------------------
+  // Relations
+  // -------------------------
+
+  etablissementDemandeur      Etablissement      @relation(
+    "EtablissementDemandeur",
+    fields: [etablissementDemandeurId],
+    references: [identifiant]
+  )
+
+  etablissementDestinataire   Etablissement?     @relation(
+    "EtablissementDestinataire",
+    fields: [etablissementDestinataireId],
+    references: [identifiant]
+  )
+
+  notifications                Notification[]
+
+  recommandations              RecommandationDonneur[]
+
+  historique                   HistoriqueDemandeSang[]
+
+  @@index([statut, urgence])
+  @@index([groupeSanguin, rhesus])
+  @@map("demandes_sang")
+}
+
+// ============================================================
+// HISTORIQUE DEMANDE DE SANG
+// ============================================================
+
+model HistoriqueDemandeSang {
+  identifiant                  Int               @id @default(autoincrement())
+
+  demandeSangIdentifiant       Int
+
+  utilisateurIdentifiant       Int
+
+  ancienStatut                 StatutDemandeSang
+
+  nouveauStatut                StatutDemandeSang
+
+  commentaire                  String?           @db.VarChar(500)
+
+  dateCreation                 DateTime          @default(now())
+
+  demandeSang                  DemandeSang       @relation(
+    fields: [demandeSangIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  utilisateur                  Utilisateur       @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant]
+  )
+
+  @@index([demandeSangIdentifiant, dateCreation])
+  @@index([utilisateurIdentifiant, dateCreation])
+  @@map("historiques_demandes_sang")
+}
+
+// ============================================================
+// JOURNAL D'AUDIT
+// ============================================================
+
+model JournalAudit {
+  identifiant                  Int          @id @default(autoincrement())
+
+  utilisateurIdentifiant       Int
+
+  action                       String       @db.VarChar(80)
+
+  ressource                    String       @db.VarChar(80)
+
+  ressourceIdentifiant         Int?
+
+  details                      String?      @db.Text
+
+  dateCreation                 DateTime     @default(now())
+
+  utilisateur                  Utilisateur  @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant]
+  )
+
+  @@index([ressource, ressourceIdentifiant, dateCreation])
+  @@index([utilisateurIdentifiant, dateCreation])
+  @@map("journaux_audit")
+}
+
+// ============================================================
+// RECOMMANDATION DONNEUR
+// ============================================================
+
+model RecommandationDonneur {
+  identifiant                  Int                   @id @default(autoincrement())
+
+  demandeSangIdentifiant       Int
+
+  donneurIdentifiant           Int
+
+  statut                       StatutRecommandation @default(EN_ATTENTE)
+
+  dateCreation                 DateTime              @default(now())
+
+  dateReponse                  DateTime?
+
+  demandeSang                  DemandeSang           @relation(
+    fields: [demandeSangIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  donneur                      Donneur               @relation(
+    fields: [donneurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@unique([demandeSangIdentifiant, donneurIdentifiant])
+
+  @@index([donneurIdentifiant, statut])
+
+  @@map("recommandations_donneurs")
+}
+
+// ============================================================
+// NOTIFICATION
+// ============================================================
+
+model Notification {
+  identifiant                  Int          @id @default(autoincrement())
+
+  utilisateurIdentifiant       Int
+
+  demandeSangIdentifiant       Int?
+
+  type                         String       @db.VarChar(60)
+
+  titre                        String       @db.VarChar(150)
+
+  message                      String       @db.VarChar(500)
+
+  estLue                       Boolean      @default(false)
+
+  dateCreation                 DateTime     @default(now())
+
+  dateLecture                  DateTime?
+
+  utilisateur                  Utilisateur  @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  demandeSang                  DemandeSang? @relation(
+    fields: [demandeSangIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  @@index([utilisateurIdentifiant, estLue, dateCreation])
+  @@map("notifications")
+}
+
+// ============================================================
+// STOCK
+// ============================================================
+
+model Stock {
+  identifiant                  Int                 @id @default(autoincrement())
+
+  etablissementIdentifiant     Int
+
+  produit                      TypeProduitSanguin
+
+  groupeSanguin                GroupeSanguin
+
+  rhesus                       Rhesus
+
+  quantite                     Int                 @default(0)
+
+  seuilAlerte                  Int                 @default(5)
+
+  dateCreation                 DateTime            @default(now())
+
+  dateModification             DateTime            @updatedAt
+
+  etablissement                Etablissement       @relation(
+    fields: [etablissementIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  mouvements                   MouvementStock[]
+
+  @@unique([
+    etablissementIdentifiant,
+    produit,
+    groupeSanguin,
+    rhesus
+  ])
+
+  @@index([groupeSanguin, rhesus, produit])
+
+  @@map("stocks")
+}
+
+// ============================================================
+// MOUVEMENT STOCK
+// ============================================================
+
+model MouvementStock {
+  identifiant                  Int                @id @default(autoincrement())
+
+  stockIdentifiant             Int
+
+  utilisateurIdentifiant       Int
+
+  type                         TypeMouvementStock
+
+  ancienneQuantite             Int
+
+  nouvelleQuantite             Int
+
+  commentaire                  String?            @db.VarChar(500)
+
+  dateCreation                 DateTime           @default(now())
+
+  stock                        Stock              @relation(
+    fields: [stockIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  utilisateur                  Utilisateur        @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant]
+  )
 
   @@index([stockIdentifiant, dateCreation])
   @@index([utilisateurIdentifiant, dateCreation])
   @@map("mouvements_stocks")
 }
 
-model ActivationCompte {
-  identifiant             Int         @id @default(autoincrement())
-  utilisateurIdentifiant  Int         @unique
-  codeHash                String      @db.VarChar(64)
-  dateExpiration          DateTime
-  estUtilise              Boolean     @default(false)
-  dateUtilisation         DateTime?
-  dateCreation            DateTime    @default(now())
+// ============================================================
+// ACTIVATION COMPTE
+// ============================================================
 
-  utilisateur             Utilisateur @relation(fields: [utilisateurIdentifiant], references: [identifiant], onDelete: Cascade)
+model ActivationCompte {
+  identifiant                  Int         @id @default(autoincrement())
+
+  utilisateurIdentifiant       Int         @unique
+
+  codeHash                     String      @db.VarChar(64)
+
+  dateExpiration               DateTime
+
+  estUtilise                   Boolean     @default(false)
+
+  dateUtilisation              DateTime?
+
+  dateCreation                 DateTime    @default(now())
+
+  utilisateur                  Utilisateur @relation(
+    fields: [utilisateurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
 
   @@map("activations_comptes")
+}
+
+// ============================================================
+// RATTACHEMENT DONNEUR - ETABLISSEMENT
+// ============================================================
+//
+// Cette table est très importante.
+//
+// Elle permet de gérer le cas :
+//
+// 1. Le donneur choisit une banque à l'inscription.
+// 2. Le système crée une demande EN_ATTENTE.
+// 3. La banque reçoit la demande.
+// 4. La banque vérifie que le donneur a réellement effectué
+//    son don chez elle.
+// 5. La banque CONFIRME ou REFUSE.
+//
+// Ainsi, le choix du donneur n'est jamais considéré comme
+// une preuve définitive.
+// ============================================================
+
+model RattachementDonneur {
+  identifiant                  Int                @id @default(autoincrement())
+
+  donneurIdentifiant           Int
+
+  etablissementIdentifiant     Int
+
+  statut                       StatutRattachement @default(EN_ATTENTE)
+
+  motif                        String?            @db.VarChar(500)
+
+  dateDemande                  DateTime           @default(now())
+
+  dateConfirmation             DateTime?
+
+  // -------------------------
+  // Relations
+  // -------------------------
+
+  donneur                      Donneur            @relation(
+    fields: [donneurIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  etablissement                Etablissement     @relation(
+    fields: [etablissementIdentifiant],
+    references: [identifiant],
+    onDelete: Cascade
+  )
+
+  // -------------------------
+  // Index
+  // -------------------------
+
+  @@index([donneurIdentifiant, statut])
+
+  @@index([etablissementIdentifiant, statut])
+
+  @@map("rattachements_donneurs")
 }

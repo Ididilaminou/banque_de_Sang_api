@@ -13,7 +13,15 @@ function genererMotDePasseTemporaire() {
 }
 
 async function creerPersonnel(req, res, next) {
-  const { courriel, prenom, nom, telephone, role, etablissementIdentifiant } = req.body;
+  const { 
+    courriel, 
+    prenom, 
+    nom, 
+    telephone, 
+    role, 
+    etablissementIdentifiant 
+  } = req.body;
+  
   const identifiantEtablissement = Number(etablissementIdentifiant);
 
   if (
